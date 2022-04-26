@@ -1,0 +1,18 @@
+.algorithmDescription {
+    font: 400 20px "Comic Sans MS";
+    color: purple;
+    margin-left: 30%;
+    flex-grow: 1;
+}
+
+.forestTitle {
+    font: 400 20px "Comic Sans MS";
+    color: purple;
+    margin-left: 40%;
+    flex-grow: 1;
+}
+.blossom {
+    font: 400 20px "Comic Sans MS";
+    color: purple;
+    margin-left: 40%;
+}
