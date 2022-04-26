@@ -153,6 +153,8 @@ function edgeProcessing(graph, cy, source, target) {
                 cy.getElementById(node.value).selectify();
             }
         }
+    } else {
+        colorAdjacentEdges(cy);
     }
 }
 
@@ -355,53 +357,28 @@ function findOtherNodeInMatching(edges, vertex) {
 }
 
 function drawAddingToForest(v, w, x, cy) {
+
     cy.getElementById(v.value).style({
         'background-color': 'green'
     })
     cy.getElementById(w.value).style({
-        'background-color': 'green'
+        'background-color': 'red'
     })
     cy.getElementById(x.value).style({
-        'background-color': 'green'
-    })
-    cy.getElementById(w.value).animate({
-        style: {
-            'background-color': 'red'
-        },
-        duration: 3000
-    })
-    cy.getElementById(x.value).animate({
-        style: {
-            'background-color': 'blue'
-        },
-        duration: 3000
+        'background-color': 'blue'
     })
     for (let edge of cy.edges()) {
         if (parseInt(edge.source().id()) === v.value &&
             parseInt(edge.target().id()) === w.value || parseInt(edge.source().id()) === w.value &&
             parseInt(edge.target().id()) === v.value) {
             edge.animate({
-                style: {
+                style:{
                     'line-color': 'green'
                 },
-                duration: 3000
-            })
-        }
-        if (parseInt(edge.source().id()) === w.value &&
-            parseInt(edge.target().id()) === x.value || parseInt(edge.source().id()) === x.value &&
-            parseInt(edge.target().id()) === w.value) {
-            edge.style({
-                'line-color': 'green'
-            })
-            edge.animate({
-                style: {
-                    'line-color': 'red'
-                },
-                duration: 3000
+                duration: 1
             })
         }
     }
-    //cy.getElementById(x.value).selectify();
 }
 
 function addToForest(rootMap, parentMap, heightMap, childMap, v, w, x) {
@@ -700,7 +677,6 @@ module.exports = {
             this.style({
                 'line-color': 'yellow',
             })
-            this.unselectify();
             edgeProcessing(graph, cy, this.source().id(), this.target().id());
         });
         start(graph, cy);
