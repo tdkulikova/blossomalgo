@@ -70,7 +70,9 @@ function colorAdjacentEdges(cy) {
     for (let edge of adjacentEdges) {
         for (let ele of cy.edges()) {
             if (parseInt(ele.source().id()) === edge.firstVertex.value &&
-                parseInt(ele.target().id()) === edge.secondVertex.value) {
+                parseInt(ele.target().id()) === edge.secondVertex.value ||
+                parseInt(ele.target().id()) === edge.firstVertex.value &&
+                parseInt(ele.source().id()) === edge.secondVertex.value) {
                 ele.style({
                     'line-color': 'blue'
                 })
@@ -106,9 +108,11 @@ function edgeProcessing(graph, cy, source, target) {
             addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
             nodesToCheck.add(x);
             drawAddingToForest(v, w, x, cy);
-            for (let node of nodesToCheck) {
-                if (node.value !== v.value) {
-                    cy.getElementById(node.value).selectify();
+            if (adjacentEdges.size === 1) {
+                for (let node of nodesToCheck) {
+                    if (node.value !== v.value) {
+                        cy.getElementById(node.value).selectify();
+                    }
                 }
             }
         } else {
@@ -144,6 +148,10 @@ function edgeProcessing(graph, cy, source, target) {
         nodesToCheck.delete(v);
         if (nodesToCheck.size === 0) {
             findAugPath(graph, [], cy)
+        } else {
+            for (let node of nodesToCheck) {
+                cy.getElementById(node.value).selectify();
+            }
         }
     }
 }
@@ -445,46 +453,48 @@ function returnAugPath(graph, rootMap, parentMap, heightMap, v, w) {
 function blossomRecursion(graph, cy, matching,
                           rootMap, parentMap, childMap, heightMap, v, w) {
     // Construct blossom
-    //let root = rootMap.get(v);
-    let root = v;
-    if (childMap.get(root).length !== 1) {
-        while (childMap.get(root).length < 2) {
-            root = parentMap.get(root);
-        }
-    }
+    let root = rootMap.get(v);
     let blossom = [];
     console.log("Blossom is: ");
     let curr = v;
-    blossom.push(root);
-    curr = childMap.get(root)[0]
-    while (curr !== null) {
-        blossom.push(curr);
-        if (childMap.get(curr).length === 0) {
-            break;
-        }
-        curr = childMap.get(curr)[0];
-    }
-    curr = w
-    let secondHalf = [];
     while (curr !== root) {
-        if (childMap.get(root).length === 1) {
-            break;
-        }
         blossom.push(curr);
         curr = parentMap.get(curr);
     }
-    //secondHalf.reverse();
-    /*for (let node of secondHalf) {
-        blossom.push(node);
-    }*/
+    blossom.push(root);
+    blossom.reverse();
+    curr = w;
+    while (curr !== root) {
+        blossom.push(curr);
+        curr = parentMap.get(curr);
+    }
+    blossom.push(root);
+    let correctedBlossom = [];
+    let rootIndex = -1;
     for (let i = 0; i < blossom.length; ++i) {
-        console.log(blossom[i] + " ");
+        if (blossom[i].value !== blossom[blossom.length - 1 - i].value) {
+            correctedBlossom.push(blossom[i]);
+            if (rootIndex < 0) {
+                rootIndex = i - 1;
+            }
+        }
+    }
+    correctedBlossom.unshift(blossom[rootIndex]);
+    blossom = correctedBlossom;
+    for (let i = 0; i < correctedBlossom.length; ++i) {
+        console.log(correctedBlossom[i] + " ");
     }
     console.log();
     let contractedGraph = contractBlossom(graph, blossom, cy);
     let contractedVertex = contractedGraph.getContractedVertex();
-    /*let contractedMatching = contractMatching(contractedGraph, matching, blossom, contractedVertex);
-    findAugPath(contractedGraph, contractedMatching, blossom);
+    for (let node of blossom) {
+        if (node.value !== contractedVertex.value) {
+            cy.getElementById(node.value).hide();
+        }
+    }
+    cy.fit();
+    let contractedMatching = contractMatching(contractedGraph, matching, blossom, contractedVertex);
+    /*findAugPath(contractedGraph, contractedMatching, blossom);
     if (containsEdgeWithNode(augPath, contractedVertex)) {
         augPath = liftPathWithBlossom(augPath, blossom, graph);
         console.log("Lifted augmenting path is: " + augPath);
@@ -529,7 +539,7 @@ function drawRemovingEdge(firstVertex, secondVertex, cy) {
         if (parseInt(edge.source().id()) === firstVertex.value &&
             parseInt(edge.target().id()) === secondVertex.value || parseInt(edge.source().id()) === secondVertex.value &&
             parseInt(edge.target().id()) === firstVertex.value) {
-            cy.remove(edge);
+            edge.hide();
         }
     }
 }
