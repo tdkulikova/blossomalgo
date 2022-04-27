@@ -14,9 +14,7 @@ let exposedVertexes;
 let unmarkedEdges;
 let nodesToCheck;
 let augPath = [];
-let adjacentEdges;
-module.exports = adjacentEdges;
-module.exports = matching;
+let adjacentEdges = new Set();
 
 let v;
 
