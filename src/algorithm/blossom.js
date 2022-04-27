@@ -2,30 +2,10 @@ let Graph = require("./graph.js");
 let Vertex = require("./vertex.js");
 let Edge = require("./edge.js");
 let cytoscape = require('cytoscape');
+let visual = require("../visualization/makeVisual")
 
 let matching = new Set();
-
-function blossomAlgorithm(graph, cy) {
-    findMaxMatching(graph, cy);
-}
-
 let clickedNode = 0;
-
-function findMaxMatching(graph, cy) {
-    let augPath = [];
-    let isMatching = false;
-    //while (!isMatching) {
-    findAugPath(graph, [], cy);
-    //isMatching = isEmpty(augPath);
-    //matching = addAltEdges(augPath, graph, matching);
-    //}
-    //return matching;
-}
-
-function isEmpty(list) {
-    return list.length === 0;
-}
-
 let rootMap;
 let childMap;
 let parentMap;
@@ -34,10 +14,22 @@ let exposedVertexes;
 let unmarkedEdges;
 let nodesToCheck;
 let augPath = [];
+let adjacentEdges;
 
 let v;
 
-function findAugPath(graph, blossomVertexes, cy) {
+function blossomAlgorithm(graph, cy) {
+    findMaxMatching(graph, cy);
+}
+
+function findMaxMatching(graph, cy) {
+    findAugPath(graph, matching, [], cy);
+}
+
+function isEmpty(list) {
+    return list.length === 0;
+}
+function findAugPath(graph, matching, blossomVertexes, cy) {
     augPath = [];
     if (blossomVertexes.length === 0) {
         rootMap = new Map();
@@ -47,7 +39,7 @@ function findAugPath(graph, blossomVertexes, cy) {
     }
     unmarkedEdges = getUnmarkedEdges(graph);
     nodesToCheck = getExposedNodes(graph, blossomVertexes, childMap);
-    colorExposedVertexes(nodesToCheck, cy);
+    visual.colorExposedVertexes(nodesToCheck, cy);
     exposedVertexes = getExposedNodes(graph, blossomVertexes, childMap);
     console.log("Matching:\n");
     outputMatching();
@@ -64,29 +56,11 @@ function findAugPath(graph, blossomVertexes, cy) {
     }
 }
 
-let adjacentEdges;
-
-function colorAdjacentEdges(cy) {
-    for (let edge of adjacentEdges) {
-        for (let ele of cy.edges()) {
-            if (parseInt(ele.source().id()) === edge.firstVertex.value &&
-                parseInt(ele.target().id()) === edge.secondVertex.value ||
-                parseInt(ele.target().id()) === edge.firstVertex.value &&
-                parseInt(ele.source().id()) === edge.secondVertex.value) {
-                ele.style({
-                    'line-color': 'blue'
-                })
-                ele.selectify();
-            }
-        }
-    }
-}
-
 function vertexProcessing(graph, cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
     console.log("Working on vertex " + clickedNode);
     adjacentEdges = graph.getAdjacentEdges(v);
-    colorAdjacentEdges(cy);
+    visual.colorAdjacentEdges(cy);
     outputAvailableEdges(adjacentEdges);
 }
 
@@ -107,7 +81,7 @@ function edgeProcessing(graph, cy, source, target) {
             let x = findOtherNodeInMatching(matching, w);
             addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
             nodesToCheck.add(x);
-            drawAddingToForest(v, w, x, cy);
+            visual.drawAddingToForest(v, w, x, cy);
             if (adjacentEdges.size === 1) {
                 for (let node of nodesToCheck) {
                     if (node.value !== v.value) {
@@ -126,10 +100,10 @@ function edgeProcessing(graph, cy, source, target) {
                         edge.unselectify();
                     }
                     matching = addAltEdges(augPath, graph, matching);
-                    unColorAdjacentEdges(cy);
-                    drawAugmentingPath(augPath, cy);
-                    finalColoring(cy);
-                    findAugPath(graph, [], cy);
+                    visual.unColorAdjacentEdges(cy);
+                    visual.drawAugmentingPath(augPath, cy);
+                    visual.finalColoring(cy);
+                    findAugPath(graph, matching,[], cy);
 
                 } else {
                     augPath = blossom(graph, matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
@@ -142,7 +116,7 @@ function edgeProcessing(graph, cy, source, target) {
         }
     }
     adjacentEdges.delete(selectedEdge);
-    unColorEdge(selectedEdge, cy);
+    visual.unColorEdge(selectedEdge, cy);
     unmarkedEdges.delete(selectedEdge);
     if (adjacentEdges.size === 0) {
         nodesToCheck.delete(v);
@@ -154,115 +128,7 @@ function edgeProcessing(graph, cy, source, target) {
             }
         }
     } else {
-        colorAdjacentEdges(cy);
-    }
-}
-
-function finalColoring(cy) {
-    for (let node of cy.nodes()) {
-        for (let edge of matching) {
-            if (edge.firstVertex.value === parseInt(node.id(), 10) ||
-                edge.secondVertex.value === parseInt(node.id(), 10)) {
-                node.style({
-                    'background-color': 'red'
-                })
-            }
-        }
-    }
-}
-
-function unColorEdge(selectedEdge, cy) {
-    for (let ele of cy.edges()) {
-        if (parseInt(ele.source().id()) === selectedEdge.firstVertex.value &&
-            parseInt(ele.target().id()) === selectedEdge.secondVertex.value) {
-            ele.style({
-                'line-color': 'pink'
-            })
-        }
-    }
-
-}
-
-function unColorAdjacentEdges(cy) {
-    let isInMatching = false;
-    for (let ele of cy.edges()) {
-        isInMatching = false;
-        for (let edge of matching) {
-            if (parseInt(ele.source().id()) === edge.firstVertex.value &&
-                parseInt(ele.target().id()) === edge.secondVertex.value) {
-                isInMatching = true;
-            }
-        }
-        if (!isInMatching) {
-            ele.style({
-                'line-color': 'pink'
-            })
-        }
-    }
-}
-
-function drawAugmentingPath(augPath, cy) {
-    for (let i = 0; i < augPath.length - 1; ++i) {
-        cy.getElementById(augPath[i].value).style({
-            'width': 40,
-            'height': 40,
-            'text-valign': 'center',
-            'color': 'white',
-            'background-color': 'red',
-            'text-outline-width': 0.5,
-            'text-outline-color': '#222'
-        })
-        cy.getElementById(augPath[i + 1].value).style({
-            'width': 40,
-            'height': 40,
-            'text-valign': 'center',
-            'color': 'white',
-            'background-color': 'red',
-            'text-outline-width': 0.5,
-            'text-outline-color': '#222'
-        })
-        for (let edge of cy.edges()) {
-            if (parseInt(edge.source().id()) === augPath[i].value &&
-                parseInt(edge.target().id()) === augPath[i + 1].value || parseInt(edge.target().id()) === augPath[i].value &&
-                parseInt(edge.source().id()) === augPath[i + 1].value) {
-                if (i % 2 === 0) {
-                    edge.style({
-                        'line-color': 'yellow'
-                    })
-                    edge.animate({
-                        style: {
-                            'line-color': 'red'
-                        },
-                        duration: 2000
-                    })
-                } else {
-                    edge.style({
-                        'line-color': 'red'
-                    })
-                    edge.animate({
-                        style: {
-                            'line-color': 'pink'
-                        },
-                        duration: 2000
-                    })
-                }
-            }
-        }
-    }
-}
-
-function colorExposedVertexes(nodesToCheck, cy) {
-    for (let node of nodesToCheck) {
-        cy.getElementById(node.value).style({
-            'width': 40,
-            'height': 40,
-            'text-valign': 'center',
-            'color': 'white',
-            'background-color': 'blue',
-            'text-outline-width': 0.5,
-            'text-outline-color': '#222'
-        });
-        cy.getElementById(node.value).selectify();
+        visual.colorAdjacentEdges(cy);
     }
 }
 
@@ -356,31 +222,6 @@ function findOtherNodeInMatching(edges, vertex) {
     return null;
 }
 
-function drawAddingToForest(v, w, x, cy) {
-
-    cy.getElementById(v.value).style({
-        'background-color': 'green'
-    })
-    cy.getElementById(w.value).style({
-        'background-color': 'red'
-    })
-    cy.getElementById(x.value).style({
-        'background-color': 'blue'
-    })
-    for (let edge of cy.edges()) {
-        if (parseInt(edge.source().id()) === v.value &&
-            parseInt(edge.target().id()) === w.value || parseInt(edge.source().id()) === w.value &&
-            parseInt(edge.target().id()) === v.value) {
-            edge.animate({
-                style:{
-                    'line-color': 'green'
-                },
-                duration: 1
-            })
-        }
-    }
-}
-
 function addToForest(rootMap, parentMap, heightMap, childMap, v, w, x) {
     console.log("    Adding edges to forest");
     console.log("    v: " + v + " w: " + w + " x: " + x);
@@ -471,8 +312,8 @@ function blossomRecursion(graph, cy, matching,
     }
     cy.fit();
     let contractedMatching = contractMatching(contractedGraph, matching, blossom, contractedVertex);
-    /*findAugPath(contractedGraph, contractedMatching, blossom);
-    if (containsEdgeWithNode(augPath, contractedVertex)) {
+    findAugPath(contractedGraph, contractedMatching, blossom, cy);
+    /*if (containsEdgeWithNode(augPath, contractedVertex)) {
         augPath = liftPathWithBlossom(augPath, blossom, graph);
         console.log("Lifted augmenting path is: " + augPath);
     }*/
@@ -490,10 +331,10 @@ function contractBlossom(graph, blossom, cy) {
     let removed;
     for (let i = 0; i < blossom.length - 1; i++) {
         removed = contracted.removeEdge(blossom[i], blossom[i + 1]);
-        drawRemovingEdge(blossom[i], blossom[i + 1], cy);
+        visual.drawRemovingEdge(blossom[i], blossom[i + 1], cy);
     }
     removed = contracted.removeEdge(blossom[blossom.length - 1], blossom[0]);
-    drawRemovingEdge(blossom[blossom.length - 1], blossom[0], cy);
+    visual.drawRemovingEdge(blossom[blossom.length - 1], blossom[0], cy);
     for (let i = 1; i < blossom.length; ++i) {
         let allNodes = graph.getAdjacentVertexes(blossom[i]);
         for (let node of allNodes) {
@@ -501,31 +342,14 @@ function contractBlossom(graph, blossom, cy) {
             let next = (i + 1) % blossom.length;
             if (node !== blossom[prev] && node !== blossom[next]) {
                 removed = contracted.removeEdge(blossom[i], node);
-                drawRemovingEdge(blossom[i], node, cy);
+                visual.drawRemovingEdge(blossom[i], node, cy);
                 contracted.addEdge(new Edge(node, contractedVertex, false));
-                drawAddingEdge(node, contractedVertex, cy);
+                visual.drawAddingEdge(node, contractedVertex, cy);
             }
         }
     }
     contracted.addContractedVertex(contractedVertex);
     return contracted;
-}
-
-function drawRemovingEdge(firstVertex, secondVertex, cy) {
-    for (let edge of cy.edges()) {
-        if (parseInt(edge.source().id()) === firstVertex.value &&
-            parseInt(edge.target().id()) === secondVertex.value || parseInt(edge.source().id()) === secondVertex.value &&
-            parseInt(edge.target().id()) === firstVertex.value) {
-            edge.hide();
-        }
-    }
-}
-
-function drawAddingEdge(firstVertex, secondVertex, cy) {
-    cy.add({
-        group: 'edges',
-        data: {source: firstVertex.value, target: secondVertex.value}
-    })
 }
 
 function contractMatching(contracted, matching, blossom, contractedVertex) {
