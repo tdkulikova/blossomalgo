@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="../src/interface/styles/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+    <script src="./bundle.js"></script>
+    <title>Blossom algorithm visualization</title>
+</head>
+<body>
+<div class="container">
+    <div class="graph" id="graph">
+        <h1 class="blossom"> Blossom graph</h1>
+        <div id="graphSvg">
+        </div>
+    </div>
+    <div class="secondContainer">
+        <div class="description" title="Algorithm description">
+            <h1 class="algorithmDescription"> Algorithm description</h1>
+        </div>
+        <div class="forest">
+            <h1 class="forestTitle">Forest</h1>
+            <div id="forestSvg">
+            </div>
+        </div>
+    </div>
+</div>
+<div onclick="show('none')" id="wrap"></div>
+<div id="window">
+    <div class="canvas">
+        <h1 class="forestTitle">Creating Graph</h1>
+        <div id="graphics">
+        </div>
+    </div>
+    <div class="upper">
+        <button id="button-delete" class="button-styled">Delete</button>
+        <button id = "button-clear" class="button-styled"> Clear</button>
+        <button id="button-ok" class="button-styled" onclick="show('none')">OK</button>
+        <button id="button-cancel" class="button-styled"
+                onclick="show('none')">
+            Cancel
+        </button>
+    </div>
+</div>
+<div class="upper">
+    <button id="button-create" class="button-styled" onclick="show('block')">Create Graph</button>
+    <button id = "button-generate" class="button-styled"> Generate Graph</button>
+    <button id="button-start" class="button-styled">Start Blossom Algorithm</button>
+</div>
+
+<script type="text/javascript">
+    //Функция показа
+    function show(state) {
+        document.getElementById('window').style.display = state;
+        document.getElementById('wrap').style.display = state;
+    }
+</script>
+
+
+
+</body>
+</html>
