@@ -1,10 +1,10 @@
 module.exports = class Vertex {
     value;
-    visited;
+    visible;
 
     constructor(value) {
         this.value = value;
-        this.visited = false;
+        this.visible = true;
     }
 
     getSmallerNode(node1, node2) {

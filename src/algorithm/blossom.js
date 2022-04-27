@@ -14,7 +14,8 @@ let exposedVertexes;
 let unmarkedEdges;
 let nodesToCheck;
 let augPath = [];
-let adjacentEdges = new Set();
+let adjacentEdges = new Set([]);
+let contractedGraph;
 
 let v;
 
@@ -56,7 +57,7 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
     }
 }
 
-function vertexProcessing(graph, cy) {
+function vertexProcessing(cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
     console.log("Working on vertex " + clickedNode);
     adjacentEdges = graph.getAdjacentEdges(v);
@@ -64,7 +65,7 @@ function vertexProcessing(graph, cy) {
     outputAvailableEdges(adjacentEdges);
 }
 
-function edgeProcessing(graph, cy, source, target) {
+function edgeProcessing(cy, source, target) {
     let w;
     let selectedEdge;
     if (v.value !== parseInt(target.toString(), 10)) {
@@ -106,7 +107,7 @@ function edgeProcessing(graph, cy, source, target) {
                     findAugPath(graph, matching,[], cy);
 
                 } else {
-                    augPath = blossom(graph, matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
+                    blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
                 }
                 console.log("augPath: " + augPath + "\n");
                 return augPath;
@@ -152,14 +153,11 @@ function outputMatching() {
     }
 }
 
-function blossom(graph, matching, rootMap, parentMap, childMap, heightMap, v, w, cy) {
+function blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy) {
     console.log();
     console.log("Starting blossom recursion");
     console.log("--------------------------");
-    let augPath = blossomRecursion(graph, cy, matching, rootMap, parentMap, childMap, heightMap, v, w);
-    console.log("Done with blossom recursion");
-    console.log("---------------------------");
-    return augPath;
+    let augPath = blossomRecursion(cy, matching, rootMap, parentMap, childMap, heightMap, v, w);
 }
 
 function getUnmarkedEdges(graph) {
@@ -175,6 +173,9 @@ function getExposedNodes(graph, blossomVertexes, childMap) {
     let exposedNodes;
     exposedNodes = graph.getAllVertexes();
     for (let edge of matching) {
+        if (!edge.firstVertex.visible) {
+            exposedNodes.delete(edge.firstVertex);
+        }
         if (edge.firstVertex !== null) {
             if (childMap.size === 0) {
                 exposedNodes.delete(edge.firstVertex);
@@ -187,6 +188,9 @@ function getExposedNodes(graph, blossomVertexes, childMap) {
                     }
                 }
             }
+        }
+        if (!edge.secondVertex.visible) {
+            exposedNodes.delete(edge.secondVertex);
         }
         if (edge.secondVertex !== null) {
             if (childMap.size === 0) {
@@ -268,7 +272,7 @@ function returnAugPath(graph, rootMap, parentMap, heightMap, v, w) {
     return augPath;
 }
 
-function blossomRecursion(graph, cy, matching,
+function blossomRecursion(cy, matching,
                           rootMap, parentMap, childMap, heightMap, v, w) {
     // Construct blossom
     let root = rootMap.get(v);
@@ -304,6 +308,7 @@ function blossomRecursion(graph, cy, matching,
     }
     console.log();
     let contractedGraph = contractBlossom(graph, blossom, cy);
+    graph = contractedGraph;
     let contractedVertex = contractedGraph.getContractedVertex();
     for (let node of blossom) {
         if (node.value !== contractedVertex.value) {
@@ -312,7 +317,7 @@ function blossomRecursion(graph, cy, matching,
     }
     cy.fit();
     let contractedMatching = contractMatching(contractedGraph, matching, blossom, contractedVertex);
-    findAugPath(contractedGraph, contractedMatching, blossom, cy);
+    findAugPath(graph, contractedMatching, blossom, cy);
     /*if (containsEdgeWithNode(augPath, contractedVertex)) {
         augPath = liftPathWithBlossom(augPath, blossom, graph);
         console.log("Lifted augmenting path is: " + augPath);
@@ -464,9 +469,10 @@ function addAltEdges(augPath, graph, matching) {
     return matching;
 }
 
+let graph = new Graph();
+
 module.exports = {
     getGraphFromCanvas: function (cy) {
-        let graph = new Graph();
         for (let edge of cy.edges()) {
             graph.addEdgeByTwoVertexes(parseInt(edge.source().id()), parseInt(edge.target().id()));
         }
@@ -495,13 +501,13 @@ module.exports = {
                     node.unselectify();
                 }
             }
-            vertexProcessing(graph, cy);
+            vertexProcessing(cy);
         });
         cy.on('select', 'edge', function (evt) {
             this.style({
                 'line-color': 'yellow',
             })
-            edgeProcessing(graph, cy, this.source().id(), this.target().id());
+            edgeProcessing(cy, this.source().id(), this.target().id());
         });
         start(graph, cy);
     }
