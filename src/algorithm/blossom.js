@@ -15,7 +15,6 @@ let unmarkedEdges;
 let nodesToCheck;
 let augPath = [];
 let adjacentEdges = new Set([]);
-let contractedGraph;
 
 let v;
 
@@ -65,6 +64,8 @@ function vertexProcessing(cy) {
     outputAvailableEdges(adjacentEdges);
 }
 
+let globalBlossom = [];
+
 function edgeProcessing(cy, source, target) {
     let w;
     let selectedEdge;
@@ -104,8 +105,8 @@ function edgeProcessing(cy, source, target) {
                     visual.unColorAdjacentEdges(cy, matching);
                     visual.drawAugmentingPath(augPath, cy);
                     visual.finalColoring(cy, matching);
+                    liftPathWithBlossom(cy, augPath, globalBlossom, graph);
                     findAugPath(graph, matching,[], cy);
-
                 } else {
                     blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
                 }
@@ -276,52 +277,53 @@ function blossomRecursion(cy, matching,
                           rootMap, parentMap, childMap, heightMap, v, w) {
     // Construct blossom
     let root = rootMap.get(v);
-    let blossom = [];
+    let blossomVertexes = [];
     console.log("Blossom is: ");
     let curr = v;
     while (curr !== root) {
-        blossom.push(curr);
+        blossomVertexes.push(curr);
         curr = parentMap.get(curr);
     }
-    blossom.push(root);
-    blossom.reverse();
+    blossomVertexes.push(root);
+    blossomVertexes.reverse();
     curr = w;
     while (curr !== root) {
-        blossom.push(curr);
+        blossomVertexes.push(curr);
         curr = parentMap.get(curr);
     }
-    blossom.push(root);
+    blossomVertexes.push(root);
     let correctedBlossom = [];
     let rootIndex = -1;
-    for (let i = 0; i < blossom.length; ++i) {
-        if (blossom[i].value !== blossom[blossom.length - 1 - i].value) {
-            correctedBlossom.push(blossom[i]);
+    for (let i = 0; i < blossomVertexes.length; ++i) {
+        if (blossomVertexes[i].value !== blossomVertexes[blossomVertexes.length - 1 - i].value) {
+            correctedBlossom.push(blossomVertexes[i]);
             if (rootIndex < 0) {
                 rootIndex = i - 1;
             }
         }
     }
-    correctedBlossom.unshift(blossom[rootIndex]);
-    blossom = correctedBlossom;
+    correctedBlossom.unshift(blossomVertexes[rootIndex]);
+    blossomVertexes = correctedBlossom;
+    globalBlossom = blossomVertexes;
     for (let i = 0; i < correctedBlossom.length; ++i) {
         console.log(correctedBlossom[i] + " ");
     }
     console.log();
-    let contractedGraph = contractBlossom(graph, blossom, cy);
+    let contractedGraph = contractBlossom(graph, blossomVertexes, cy);
     graph = contractedGraph;
     let contractedVertex = contractedGraph.getContractedVertex();
-    for (let node of blossom) {
+    for (let node of blossomVertexes) {
         if (node.value !== contractedVertex.value) {
             cy.getElementById(node.value).hide();
         }
     }
     cy.fit();
-    let contractedMatching = contractMatching(contractedGraph, matching, blossom, contractedVertex);
-    findAugPath(graph, contractedMatching, blossom, cy);
-    /*if (containsEdgeWithNode(augPath, contractedVertex)) {
-        augPath = liftPathWithBlossom(augPath, blossom, graph);
-        console.log("Lifted augmenting path is: " + augPath);
-    }*/
+    let contractedMatching = contractMatching(contractedGraph, matching, blossomVertexes, contractedVertex);
+    findAugPath(graph, contractedMatching, blossomVertexes, cy);
+    if (containsEdgeWithNode(augPath, contractedVertex)) {
+        augPath = liftPathWithBlossom(cy, augPath, blossomVertexes, graph);
+        //console.log("Lifted augmenting path is: " + augPath);
+    }
     return augPath;
 }
 
@@ -390,7 +392,7 @@ function containsEdgeWithNode(path, vertex) {
     return false;
 }
 
-function liftPathWithBlossom(augPath, blossom, graph) {
+function liftPathWithBlossom(cy, augPath, blossom, graph) {
     let lifted = [];
     let contractedNode = blossom[0];
     for (let i = 0; i < augPath.length; ++i) {
@@ -402,12 +404,15 @@ function liftPathWithBlossom(augPath, blossom, graph) {
                 if (outgoingIndex % 2 === 0) {
                     for (let j = outgoingIndex; j >= 0; --j) {
                         lifted.push(blossom[j]);
+                        cy.getElementById(blossom[j].value).show();
                     }
                 } else {
                     for (let j = outgoingIndex; j <= blossom.length - 1; ++j) {
                         lifted.push(blossom[j]);
+                        cy.getElementById(blossom[j].value).show();
                     }
                     lifted.push(blossom[0]);
+                    cy.getElementById(blossom[0].value).show();
                 }
             } else {
                 if (i % 2 === 0) {
@@ -415,11 +420,14 @@ function liftPathWithBlossom(augPath, blossom, graph) {
                     if (outgoingIndex % 2 === 0) {
                         for (let j = 0; j <= outgoingIndex; j++) {
                             lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
                         }
                     } else {
                         lifted.push(blossom[0]);
+                        cy.getElementById(blossom[0].value).show();
                         for (let j = blossom.length - 1; j >= outgoingIndex; j--) {
                             lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
                         }
                     }
                 }
@@ -429,12 +437,15 @@ function liftPathWithBlossom(augPath, blossom, graph) {
                     if (outgoingIndex % 2 === 0) {
                         for (let j = outgoingIndex; j >= 0; j--) {
                             lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
                         }
                     } else {
                         for (let j = outgoingIndex; j < blossom.length; j++) {
                             lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
                         }
                         lifted.push(blossom[0]);
+                        cy.getElementById(blossom[0].value).show();
                     }
                 }
             }
@@ -442,6 +453,7 @@ function liftPathWithBlossom(augPath, blossom, graph) {
         // just add the nodes in the augmenting path
         else {
             lifted.push(augPath[i]);
+            cy.getElementById(augPath[i].value).show();
         }
     }
     return lifted;
