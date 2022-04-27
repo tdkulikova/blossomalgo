@@ -1,5 +1,6 @@
+
 module.exports = {
-    colorAdjacentEdges(cy) {
+    colorAdjacentEdges(cy, adjacentEdges) {
         for (let edge of adjacentEdges) {
             for (let ele of cy.edges()) {
                 if (parseInt(ele.source().id()) === edge.firstVertex.value &&
@@ -14,7 +15,7 @@ module.exports = {
             }
         }
     },
-    finalColoring: function (cy) {
+    finalColoring: function (cy, matching) {
         for (let node of cy.nodes()) {
             for (let edge of matching) {
                 if (edge.firstVertex.value === parseInt(node.id(), 10) ||
@@ -38,7 +39,7 @@ module.exports = {
         }
     },
 
-    unColorAdjacentEdges: function (cy) {
+    unColorAdjacentEdges: function (cy, matching) {
         let isInMatching = false;
         for (let ele of cy.edges()) {
             isInMatching = false;

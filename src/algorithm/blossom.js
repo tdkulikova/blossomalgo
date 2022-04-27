@@ -15,6 +15,8 @@ let unmarkedEdges;
 let nodesToCheck;
 let augPath = [];
 let adjacentEdges;
+module.exports = adjacentEdges;
+module.exports = matching;
 
 let v;
 
@@ -60,7 +62,7 @@ function vertexProcessing(graph, cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
     console.log("Working on vertex " + clickedNode);
     adjacentEdges = graph.getAdjacentEdges(v);
-    visual.colorAdjacentEdges(cy);
+    visual.colorAdjacentEdges(cy, adjacentEdges);
     outputAvailableEdges(adjacentEdges);
 }
 
@@ -100,9 +102,9 @@ function edgeProcessing(graph, cy, source, target) {
                         edge.unselectify();
                     }
                     matching = addAltEdges(augPath, graph, matching);
-                    visual.unColorAdjacentEdges(cy);
+                    visual.unColorAdjacentEdges(cy, matching);
                     visual.drawAugmentingPath(augPath, cy);
-                    visual.finalColoring(cy);
+                    visual.finalColoring(cy, matching);
                     findAugPath(graph, matching,[], cy);
 
                 } else {
