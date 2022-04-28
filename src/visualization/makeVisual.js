@@ -1,4 +1,3 @@
-
 module.exports = {
     colorAdjacentEdges(cy, adjacentEdges) {
         for (let edge of adjacentEdges) {
@@ -164,7 +163,7 @@ module.exports = {
         })
     },
 
-    drawShowingEdge: function(firstVertex, secondVertex, cy) {
+    drawShowingEdge: function (firstVertex, secondVertex, cy) {
         for (let edge of cy.edges()) {
             if (parseInt(edge.source().id()) === firstVertex.value &&
                 parseInt(edge.target().id()) === secondVertex.value || parseInt(edge.source().id()) === secondVertex.value &&
@@ -172,5 +171,44 @@ module.exports = {
                 edge.show();
             }
         }
+    },
+
+    drawAddingEdgeToForest: function (forest, firstVertex, secondVertex) {
+        let isFirstExists = false;
+        let isSecondExists = false;
+        for (let node of forest.nodes()) {
+            if (parseInt(node.id(), 10) === firstVertex.value) {
+                isFirstExists = true;
+            }
+        }
+        for (let node of forest.nodes()) {
+            if (parseInt(node.id(), 10) === secondVertex.value) {
+                isSecondExists = true;
+            }
+        }
+        if (isFirstExists) {
+            forest.add({
+                group: 'nodes',
+                data: {
+                    id: secondVertex.value,
+                    text: secondVertex.value
+                }
+            })
+            forest.add({
+                group: 'edges',
+                data: {source: firstVertex.value, target: secondVertex.value}
+            })
+        }
+    },
+
+    drawAddingNodeToForest: function (forest, vertex) {
+        forest.add({
+            group: 'nodes',
+            data: {
+                id: vertex.value,
+                text: vertex.value,
+                position: 10 * vertex.value
+            }
+        })
     }
 }

@@ -1,13 +1,15 @@
 const cytoscape = require("cytoscape");
 
+let forest;
+
 module.exports = {
     makeForest: function () {
-        let forest = cytoscape({
+        forest = cytoscape({
             container: document.getElementById('forestSvg'),
             minZoom: 0.1,
             maxZoom: 100,
             layout: {
-                name: 'random'
+                name: 'breadthfirst'
             },
             style: [{
                 selector: 'node',
@@ -50,64 +52,11 @@ module.exports = {
                     }
                 }
             ],
-
-            elements: {
-                //selectable: true,
-                grabbable: false,
-                nodes: [{
-                    data: {
-                        id: '1',
-                        text: '1'
-                    }
-                }, {
-                    data: {
-                        id: '2',
-                        text: '2'
-                    }
-                }, {
-                    data: {
-                        id: '3',
-                        text: '3'
-                    }
-                }, {
-                    data: {
-                        id: '4',
-                        text: '4'
-                    }
-                }], // nodes
-                edges: [{
-                    data: {
-                        color: '#f00',
-                        source: '1',
-                        target: '2'
-                    }
-                }, {
-                    data: {
-                        color: '#f00',
-                        source: '2',
-                        target: '3'
-                    }
-                }, {
-                    data: {
-                        color: '#f00',
-                        source: '3',
-                        target: '4'
-                    }
-                }, {
-                    data: {
-                        color: '#f00',
-                        source: '1',
-                        target: '3'
-                    }
-                }, {
-                    data: {
-                        color: '#000',
-                        source: '1',
-                        target: '4'
-                    }
-                },]
-            }
         });
         forest.center();
+    },
+
+    getForest:function() {
+        return forest;
     }
 }

@@ -2,8 +2,10 @@ let Graph = require("./graph.js");
 let Vertex = require("./vertex.js");
 let Edge = require("./edge.js");
 let cytoscape = require('cytoscape');
-let visual = require("../visualization/makeVisual")
-const {drawAugmentingPath} = require("../visualization/makeVisual");
+
+let {getForest} = require("../visualization/forest");
+let visual = require("../visualization/makeVisual");
+const {drawAugmentingPath, drawAddingEdgeToForest, drawAddingNodeToForest} = require("../visualization/makeVisual");
 
 let matching = new Set();
 let clickedNode = 0;
@@ -38,6 +40,10 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
         parentMap = new Map();
         heightMap = new Map();
     }
+    let forest = getForest();
+    for (let node of forest.nodes()) {
+        forest.remove(node);
+    }
     unmarkedEdges = getUnmarkedEdges(graph);
     nodesToCheck = getExposedNodes(graph, blossomVertexes, childMap);
     visual.colorExposedVertexes(nodesToCheck, cy);
@@ -46,6 +52,7 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
     outputMatching();
     for (let vertex of exposedVertexes) {
         console.log("Added to forest: " + vertex);
+        drawAddingNodeToForest(getForest(), vertex);
         rootMap.set(vertex, vertex);
         parentMap.set(vertex, null);
         childMap.set(vertex, []);
@@ -87,6 +94,9 @@ function edgeProcessing(cy, source, target) {
             addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
             nodesToCheck.add(x);
             visual.drawAddingToForest(v, w, x, cy);
+            let forest = getForest();
+            drawAddingEdgeToForest(forest, v, w);
+            drawAddingEdgeToForest(forest, w, x);
             if (adjacentEdges.size === 1) {
                 for (let node of nodesToCheck) {
                     if (node.value !== v.value) {
