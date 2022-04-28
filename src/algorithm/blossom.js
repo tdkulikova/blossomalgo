@@ -50,14 +50,25 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
     exposedVertexes = getExposedNodes(graph, blossomVertexes, childMap);
     console.log("Matching:\n");
     outputMatching();
+    let number = 0;
     for (let vertex of exposedVertexes) {
         console.log("Added to forest: " + vertex);
-        drawAddingNodeToForest(getForest(), vertex);
+        drawAddingNodeToForest(getForest(), vertex, exposedVertexes.size, number);
         rootMap.set(vertex, vertex);
         parentMap.set(vertex, null);
         childMap.set(vertex, []);
         heightMap.set(vertex, 0);
+        ++number;
     }
+    /*for (let i = 0; i < exposedVertexes; ++i) {
+        forest.add({
+            group: 'edges',
+            data: {source: exposedVertexes[i].value, target: exposedVertexes[i + 1].value},
+            style: {
+                visibility: 'hidden'
+            }
+        })
+    }*/
     outputAvailableVertexes(nodesToCheck);
     if (nodesToCheck.size === 0) {
         console.log("The matching is found!");

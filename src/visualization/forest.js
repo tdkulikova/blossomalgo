@@ -9,7 +9,7 @@ module.exports = {
             minZoom: 0.1,
             maxZoom: 100,
             layout: {
-                name: 'breadthfirst'
+                name: 'breadthfirst',
             },
             style: [{
                 selector: 'node',
@@ -52,6 +52,14 @@ module.exports = {
                     }
                 }
             ],
+            elements: {
+                //selectable: false,
+                grabbable: false,
+                nodes: [
+                ], // nodes
+                edges: []
+
+            }
         });
         forest.center();
     },

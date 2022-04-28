@@ -199,16 +199,29 @@ module.exports = {
                 data: {source: firstVertex.value, target: secondVertex.value}
             })
         }
+        forest.fit();
+        forest.center();
     },
 
-    drawAddingNodeToForest: function (forest, vertex) {
+    drawAddingNodeToForest: function (forest, vertex, size, number) {
+        let forestSvg = document.querySelector('#forestSvg');
+        forest.startBatch();
         forest.add({
             group: 'nodes',
+            layout: {
+                name: 'breadthfirst'
+            },
             data: {
                 id: vertex.value,
                 text: vertex.value,
-                position: 10 * vertex.value
+            },
+            position: {
+                x: number / size * forestSvg.getBoundingClientRect().width,
+                y: 10,
             }
-        })
+        });
+        forest.endBatch();
+        forest.center();
+        forest.fit()
     }
 }
