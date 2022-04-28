@@ -3,6 +3,7 @@ require("./initialization.js");
 
 let cytoscape = require('cytoscape')
 const {init} = require("./initialization");
+const {makeForest} = require("../../visualization/forest")
 const cont = require("./initialization");
 document.addEventListener("DOMContentLoaded", main);
 
@@ -12,6 +13,7 @@ let gr;
 
 function main() {
     makeFirstGraph();
+    makeForest();
     init(gr);
 }
 

@@ -3,6 +3,7 @@ let Vertex = require("./vertex.js");
 let Edge = require("./edge.js");
 let cytoscape = require('cytoscape');
 let visual = require("../visualization/makeVisual")
+const {drawAugmentingPath} = require("../visualization/makeVisual");
 
 let matching = new Set();
 let clickedNode = 0;
@@ -108,7 +109,7 @@ function edgeProcessing(cy, source, target) {
                     visual.drawAugmentingPath(augPath, cy);
                     visual.finalColoring(cy, matching);
                     if (containsEdgeWithNode(augPath, contractedVertex)) {
-                        augPath = liftPathWithBlossom(cy, augPath, globalBlossom, notContractedGraph);
+                        augPath = liftPathWithBlossom(cy, augPath, globalBlossom);
                         //console.log("Lifted augmenting path is: " + augPath);
                     }
                     findAugPath(graph, matching,[], cy);
@@ -399,7 +400,7 @@ function containsEdgeWithNode(path, vertex) {
     return false;
 }
 
-function liftPathWithBlossom(cy, augPath, blossom, graph) {
+function liftPathWithBlossom(cy, augPath, blossom) {
     let lifted = [];
     let contractedNode = blossom[0];
     for (let i = 0; i < augPath.length; ++i) {
@@ -407,7 +408,7 @@ function liftPathWithBlossom(cy, augPath, blossom, graph) {
         if (augPath[i] === contractedNode) {
             // leftmost of the augmenting path or in the middle of the augmenting path, right unmatched
             if (i === augPath.length - 1) {
-                let outgoingIndex = findOutgoingIndex(augPath[i - 1], blossom, graph);
+                let outgoingIndex = findOutgoingIndex(augPath[i - 1], blossom, notContractedGraph);
                 if (outgoingIndex % 2 === 0) {
                     for (let j = outgoingIndex; j >= 0; --j) {
                         lifted.push(blossom[j]);
@@ -423,7 +424,7 @@ function liftPathWithBlossom(cy, augPath, blossom, graph) {
                 }
             } else {
                 if (i % 2 === 0) {
-                    let outgoingIndex = findOutgoingIndex(augPath[i + 1], blossom, graph);
+                    let outgoingIndex = findOutgoingIndex(augPath[i + 1], blossom, notContractedGraph);
                     if (outgoingIndex % 2 === 0) {
                         for (let j = 0; j <= outgoingIndex; j++) {
                             lifted.push(blossom[j]);
@@ -440,7 +441,7 @@ function liftPathWithBlossom(cy, augPath, blossom, graph) {
                 }
                 // rightmost of the augmenting path or in the middle of the augmenting path, left unmatched
                 if (i % 2 === 1) {
-                    let outgoingIndex = findOutgoingIndex(augPath[i + 1], blossom, graph);
+                    let outgoingIndex = findOutgoingIndex(augPath[i + 1], blossom, notContractedGraph);
                     if (outgoingIndex % 2 === 0) {
                         for (let j = outgoingIndex; j >= 0; j--) {
                             lifted.push(blossom[j]);
@@ -465,8 +466,17 @@ function liftPathWithBlossom(cy, augPath, blossom, graph) {
         for (let node of blossom) {
             cy.getElementById(node.value).show();
         }
+        for (let edge of notContractedGraph.edgeSet) {
+            visual.drawShowingEdge(edge.firstVertex, edge.secondVertex, cy);
+        }
+        for (let edge of graph.edgeSet) {
+            if (!notContractedGraph.edgeSet.has(edge)) {
+                visual.drawRemovingEdge(edge.firstVertex, edge.secondVertex, cy);
+            }
+        }
         cy.fit();
     }
+    drawAugmentingPath(lifted, cy);
     return lifted;
 }
 

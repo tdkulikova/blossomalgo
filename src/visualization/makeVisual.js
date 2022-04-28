@@ -162,5 +162,15 @@ module.exports = {
             group: 'edges',
             data: {source: firstVertex.value, target: secondVertex.value}
         })
+    },
+
+    drawShowingEdge: function(firstVertex, secondVertex, cy) {
+        for (let edge of cy.edges()) {
+            if (parseInt(edge.source().id()) === firstVertex.value &&
+                parseInt(edge.target().id()) === secondVertex.value || parseInt(edge.source().id()) === secondVertex.value &&
+                parseInt(edge.target().id()) === firstVertex.value) {
+                edge.show();
+            }
+        }
     }
 }
