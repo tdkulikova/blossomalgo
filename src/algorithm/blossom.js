@@ -65,6 +65,8 @@ function vertexProcessing(cy) {
 }
 
 let globalBlossom = [];
+let notContractedGraph;
+let contractedVertex;
 
 function edgeProcessing(cy, source, target) {
     let w;
@@ -105,7 +107,10 @@ function edgeProcessing(cy, source, target) {
                     visual.unColorAdjacentEdges(cy, matching);
                     visual.drawAugmentingPath(augPath, cy);
                     visual.finalColoring(cy, matching);
-                    liftPathWithBlossom(cy, augPath, globalBlossom, graph);
+                    if (containsEdgeWithNode(augPath, contractedVertex)) {
+                        augPath = liftPathWithBlossom(cy, augPath, globalBlossom, notContractedGraph);
+                        //console.log("Lifted augmenting path is: " + augPath);
+                    }
                     findAugPath(graph, matching,[], cy);
                 } else {
                     blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
@@ -310,6 +315,7 @@ function blossomRecursion(cy, matching,
     }
     console.log();
     let contractedGraph = contractBlossom(graph, blossomVertexes, cy);
+    notContractedGraph = graph;
     graph = contractedGraph;
     let contractedVertex = contractedGraph.getContractedVertex();
     for (let node of blossomVertexes) {
@@ -329,7 +335,7 @@ function blossomRecursion(cy, matching,
 
 function contractBlossom(graph, blossom, cy) {
     let contracted = new Graph();
-    let contractedVertex = blossom[0];
+    contractedVertex = blossom[0];
     console.log("Beginning contraction to " + contractedVertex);
     let allEdges = graph.getAllEdges();
     for (let edge of allEdges) {
@@ -356,6 +362,7 @@ function contractBlossom(graph, blossom, cy) {
         }
     }
     contracted.addContractedVertex(contractedVertex);
+    contractedVertex.visible = true;
     return contracted;
 }
 
@@ -455,6 +462,10 @@ function liftPathWithBlossom(cy, augPath, blossom, graph) {
             lifted.push(augPath[i]);
             cy.getElementById(augPath[i].value).show();
         }
+        for (let node of blossom) {
+            cy.getElementById(node.value).show();
+        }
+        cy.fit();
     }
     return lifted;
 }
