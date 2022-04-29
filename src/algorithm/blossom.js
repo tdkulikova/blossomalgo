@@ -106,8 +106,8 @@ function edgeProcessing(cy, source, target) {
             nodesToCheck.add(x);
             visual.drawAddingToForest(v, w, x, cy);
             let forest = getForest();
-            drawAddingEdgeToForest(forest, v, w);
-            drawAddingEdgeToForest(forest, w, x);
+            drawAddingEdgeToForest(forest, v, w, rootMap, childMap, parentMap);
+            drawAddingEdgeToForest(forest, w, x, rootMap, childMap, parentMap);
             if (adjacentEdges.size === 1) {
                 for (let node of nodesToCheck) {
                     if (node.value !== v.value) {

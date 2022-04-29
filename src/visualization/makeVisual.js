@@ -173,12 +173,15 @@ module.exports = {
         }
     },
 
-    drawAddingEdgeToForest: function (forest, firstVertex, secondVertex) {
+    drawAddingEdgeToForest: function (forest, firstVertex, secondVertex, rootMap, childMap, parentMap) {
         let isFirstExists = false;
         let isSecondExists = false;
+        let first;
+        let root = rootMap.get(firstVertex);
         for (let node of forest.nodes()) {
             if (parseInt(node.id(), 10) === firstVertex.value) {
                 isFirstExists = true;
+                first = node;
             }
         }
         for (let node of forest.nodes()) {
@@ -187,11 +190,34 @@ module.exports = {
             }
         }
         if (isFirstExists) {
+            let x;
+            let y;
+            if (firstVertex !== root) {
+                x = first.position().x;
+                y = first.position().y + 50;
+            } else {
+                if (childMap.get(root).length === 1) {
+                    x = first.position().x;
+                    y = first.position().y + 50;
+                } else {
+                    if ((childMap.get(root).length - 1) % 2 === 1) {
+                        x = first.position().x - (childMap.get(root).length - 1) / 20 * 400;
+                        y = first.position().y + 50;
+                    } else {
+                        x = first.position().x + (childMap.get(root).length - 2) / 20 * 400;
+                        y = first.position().y + 50;
+                    }
+                }
+            }
             forest.add({
                 group: 'nodes',
                 data: {
                     id: secondVertex.value,
                     text: secondVertex.value
+                },
+                position: {
+                    x: x,
+                    y: y
                 }
             })
             forest.add({
@@ -216,7 +242,7 @@ module.exports = {
                 text: vertex.value,
             },
             position: {
-                x: number / size * forestSvg.getBoundingClientRect().width,
+                x: number / size * (forestSvg.getBoundingClientRect().width),
                 y: 10,
             }
         });
