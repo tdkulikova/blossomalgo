@@ -6,11 +6,55 @@ module.exports = class Graph {
     adjacencyList;
     edgeSet;
     contractedVertex;
+    components = [];
+    used = [];
 
     constructor() {
         this.nodeMap = new Map();
         this.edgeSet = new Set();
         this.adjacencyList = new Map();
+        this.findComponents();
+    }
+
+    component = [];
+
+    dfs(v) {
+        this.used[v.value - 1] = true;
+        this.component.push(v);
+        let edges = new Set();
+        let map = this.adjacencyList.get(v);
+        map.forEach((value) => {
+            edges.add(value)
+        });
+        for (let edge of edges) {
+            let to;
+            if (edge.firstVertex !== v) {
+                to = edge.firstVertex;
+            } else {
+                to = edge.secondVertex;
+            }
+            if (!this.used[to.value - 1]) {
+                this.dfs(to);
+            }
+        }
+    }
+
+    findComponents() {
+        for (let i = 0; i < this.nodeMap.size; ++i) {
+            this.used[i] = false;
+        }
+        for (let i = 0; i < this.nodeMap.size; ++i) {
+            if (!this.used[i]) {
+                if (this.component.length !== 0) {
+                    this.components.push(this.component);
+                }
+                this.component = [];
+                this.dfs(this.nodeMap.get(i + 1));
+            }
+        }
+        if (this.component.length !== 0) {
+            this.components.push(this.component);
+        }
     }
 
     size() {
@@ -57,6 +101,8 @@ module.exports = class Graph {
             this.adjacencyList.get(edge.firstVertex).set(edge.secondVertex, edge);
             this.adjacencyList.get(edge.secondVertex).set(edge.firstVertex, edge);
             this.edgeSet.add(edge);
+            edge.firstVertex.visible = true;
+            edge.secondVertex.visible = true;
         }
     }
 
@@ -73,10 +119,12 @@ module.exports = class Graph {
         return new Set(this.nodeMap.values());
     }
 
-    getAdjacentEdges(v) {
+    getAdjacentEdges(v, matching) {
         let list = new Set();
         let map = this.adjacencyList.get(v);
-        map.forEach((value) => list.add(value));
+        map.forEach((value) => {
+            if (!matching.has(value)) list.add(value)
+        });
         return list;
     }
 

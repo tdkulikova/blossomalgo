@@ -78,9 +78,16 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
 function vertexProcessing(cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
     console.log("Working on vertex " + clickedNode);
-    adjacentEdges = graph.getAdjacentEdges(v);
-    visual.colorAdjacentEdges(cy, adjacentEdges);
-    outputAvailableEdges(adjacentEdges);
+    document.getElementById('algoSvg').innerText = "Working on vertex " + clickedNode;
+    adjacentEdges = graph.getAdjacentEdges(v, matching);
+    if (adjacentEdges.size === 0) {
+        cy.getElementById(v.value).style({
+            'background-color':'red'
+        });
+        findAugPath(graph, matching, [], cy);
+    } else {
+    visual.colorAdjacentEdges(cy, adjacentEdges, matching);
+    outputAvailableEdges(adjacentEdges);}
 }
 
 let globalBlossom = [];
@@ -133,7 +140,10 @@ function edgeProcessing(cy, source, target) {
                         augPath = liftPathWithBlossom(cy, augPath, globalBlossom);
                         //console.log("Lifted augmenting path is: " + augPath);
                     }
-                    findAugPath(graph, matching,[], cy);
+                    if (checking(graph, matching)) {
+                    findAugPath(graph, matching,[], cy);} else {
+                        console.log("Matching is found!");
+                    }
                 } else {
                     blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
                 }
@@ -157,8 +167,40 @@ function edgeProcessing(cy, source, target) {
             }
         }
     } else {
-        visual.colorAdjacentEdges(cy);
+        //visual.colorAdjacentEdges(cy);
     }
+}
+
+function checking (graph, matching) {
+    for (let i = 0; i < graph.components.length; ++i) {
+        if (checkingComponent(graph.components[i], matching)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function checkingComponent(component, matching) {
+    let amount = 0;
+    for (let node of component) {
+        let isInMatching = false;
+        for (let edge of matching) {
+            if (edge.firstVertex.value === node.value ||
+                edge.secondVertex.value === node.value) {
+                isInMatching = true;
+            }
+        }
+        if (!isInMatching) {
+            let edges = graph.getAdjacentEdges(node, matching);
+            if (edges.size !== 0) {
+               ++amount;
+            }
+        }
+    }
+    if (amount >= 2) {
+        return true;
+    }
+    return false;
 }
 
 function outputAvailableVertexes(nodesToCheck) {
@@ -530,6 +572,7 @@ module.exports = {
         for (let edge of cy.edges()) {
             graph.addEdgeByTwoVertexes(parseInt(edge.source().id()), parseInt(edge.target().id()));
         }
+        graph.findComponents();
         for (let edge of graph.edgeSet) {
             console.log(edge.toString());
         }

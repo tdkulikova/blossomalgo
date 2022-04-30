@@ -113,7 +113,8 @@ function graphGenerator() {
         }
     ); // cytoscape*/);
 
-    let graphSvg = document.querySelector('#graphSvg')
+    let graphSvg = document.querySelector('#graphSvg');
+    document.getElementById('algoSvg').innerHTML = '<b>Новое содержимое</b>';
 
     graph.startBatch();
     for (let i = 3; i <= nodesAmount; ++i) {

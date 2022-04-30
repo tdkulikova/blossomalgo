@@ -1,15 +1,19 @@
 module.exports = {
-    colorAdjacentEdges(cy, adjacentEdges) {
+    colorAdjacentEdges(cy, adjacentEdges, matching) {
         for (let edge of adjacentEdges) {
             for (let ele of cy.edges()) {
                 if (parseInt(ele.source().id()) === edge.firstVertex.value &&
                     parseInt(ele.target().id()) === edge.secondVertex.value ||
                     parseInt(ele.target().id()) === edge.firstVertex.value &&
                     parseInt(ele.source().id()) === edge.secondVertex.value) {
-                    ele.style({
-                        'line-color': 'blue'
-                    })
-                    ele.selectify();
+                    if (!matching.has(edge)) {
+                        ele.style({
+                            'line-color': 'blue'
+                        })
+                        ele.selectify();
+                    } else {
+
+                    }
                 }
             }
         }
@@ -157,6 +161,7 @@ module.exports = {
     },
 
     drawAddingEdge: function (firstVertex, secondVertex, cy) {
+
         cy.add({
             group: 'edges',
             data: {source: firstVertex.value, target: secondVertex.value}
@@ -193,8 +198,18 @@ module.exports = {
             let x;
             let y;
             if (firstVertex !== root) {
-                x = first.position().x;
-                y = first.position().y + 50;
+                if (childMap.get(firstVertex).length === 1) {
+                    x = first.position().x;
+                    y = first.position().y + 50;
+                } else {
+                    if ((childMap.get(firstVertex).length - 1) % 2 === 1) {
+                        x = first.position().x - (childMap.get(firstVertex).length - 1) / 20 * 400;
+                        y = first.position().y + 50;
+                    } else {
+                        x = first.position().x + (childMap.get(firstVertex).length - 2) / 20 * 400;
+                        y = first.position().y + 50;
+                    }
+                }
             } else {
                 if (childMap.get(root).length === 1) {
                     x = first.position().x;
