@@ -32,6 +32,7 @@ function findMaxMatching(graph, cy) {
 function isEmpty(list) {
     return list.length === 0;
 }
+
 function findAugPath(graph, matching, blossomVertexes, cy) {
     augPath = [];
     if (blossomVertexes.length === 0) {
@@ -75,6 +76,24 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
     }
 }
 
+function findAugPathWithBlossom(contractedGraph, contractedMatching, blossomVertexes, cy) {
+    let augPath = [];
+    let forest = getForest();
+    unmarkedEdges = getUnmarkedEdges(graph);
+    nodesToCheck = getExposedNodes(graph, blossomVertexes, childMap);
+    visual.colorExposedVertexes(nodesToCheck, cy);
+    exposedVertexes = getExposedNodes(graph, blossomVertexes, childMap);
+    console.log("Matching:\n");
+    outputMatching();
+    let number = 0;
+    outputAvailableVertexes(nodesToCheck);
+    if (nodesToCheck.size === 0) {
+        console.log("The matching is found!");
+    }
+}
+
+let contrMatching = matching;
+
 function vertexProcessing(cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
     console.log("Working on vertex " + clickedNode);
@@ -82,17 +101,21 @@ function vertexProcessing(cy) {
     adjacentEdges = graph.getAdjacentEdges(v, matching);
     if (adjacentEdges.size === 0) {
         cy.getElementById(v.value).style({
-            'background-color':'red'
+            'background-color': 'red'
         });
         findAugPath(graph, matching, [], cy);
     } else {
-    visual.colorAdjacentEdges(cy, adjacentEdges, matching);
-    outputAvailableEdges(adjacentEdges);}
+        visual.colorAdjacentEdges(cy, adjacentEdges, matching);
+        outputAvailableEdges(adjacentEdges);
+    }
 }
 
 let globalBlossom = [];
 let notContractedGraph;
 let contractedVertex;
+let blossoms = [];
+let contractedVertexes = [];
+let graphConditions = [];
 
 function edgeProcessing(cy, source, target) {
     let w;
@@ -136,12 +159,20 @@ function edgeProcessing(cy, source, target) {
                     visual.unColorAdjacentEdges(cy, matching);
                     visual.drawAugmentingPath(augPath, cy);
                     visual.finalColoring(cy, matching);
-                    if (containsEdgeWithNode(augPath, contractedVertex)) {
-                        augPath = liftPathWithBlossom(cy, augPath, globalBlossom);
-                        //console.log("Lifted augmenting path is: " + augPath);
+                    for (let i = blossoms.length - 1; i >= 0; --i) {
+                        if (containsEdgeWithNode(augPath, contractedVertexes[i])) {
+                            if (i === blossoms.length - 1) {
+                                augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
+                            } else {
+                                augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
+                            }
+                        }
                     }
+                    blossoms = [];
+                    contractedVertexes = [];
                     if (checking(graph, matching)) {
-                    findAugPath(graph, matching,[], cy);} else {
+                        findAugPath(graph, matching, [], cy);
+                    } else {
                         console.log("Matching is found!");
                     }
                 } else {
@@ -171,7 +202,7 @@ function edgeProcessing(cy, source, target) {
     }
 }
 
-function checking (graph, matching) {
+function checking(graph, matching) {
     for (let i = 0; i < graph.components.length; ++i) {
         if (checkingComponent(graph.components[i], matching)) {
             return true;
@@ -193,7 +224,7 @@ function checkingComponent(component, matching) {
         if (!isInMatching) {
             let edges = graph.getAdjacentEdges(node, matching);
             if (edges.size !== 0) {
-               ++amount;
+                ++amount;
             }
         }
     }
@@ -374,12 +405,14 @@ function blossomRecursion(cy, matching,
     correctedBlossom.unshift(blossomVertexes[rootIndex]);
     blossomVertexes = correctedBlossom;
     globalBlossom = blossomVertexes;
+    blossoms.push(blossomVertexes);
     for (let i = 0; i < correctedBlossom.length; ++i) {
         console.log(correctedBlossom[i] + " ");
     }
     console.log();
     let contractedGraph = contractBlossom(graph, blossomVertexes, cy);
     notContractedGraph = graph;
+    graphConditions.push(graph);
     graph = contractedGraph;
     let contractedVertex = contractedGraph.getContractedVertex();
     for (let node of blossomVertexes) {
@@ -388,8 +421,9 @@ function blossomRecursion(cy, matching,
         }
     }
     cy.fit();
-    let contractedMatching = contractMatching(contractedGraph, matching, blossomVertexes, contractedVertex);
-    findAugPath(graph, contractedMatching, blossomVertexes, cy);
+    let contractedMatching = contractMatching(contractedGraph, contrMatching, blossomVertexes, contractedVertex);
+    contrMatching = contractedMatching;
+    findAugPathWithBlossom(graph, contractedMatching, blossomVertexes, cy);
     if (containsEdgeWithNode(augPath, contractedVertex)) {
         augPath = liftPathWithBlossom(cy, augPath, blossomVertexes, graph);
         //console.log("Lifted augmenting path is: " + augPath);
@@ -426,6 +460,7 @@ function contractBlossom(graph, blossom, cy) {
         }
     }
     contracted.addContractedVertex(contractedVertex);
+    contractedVertexes.push(contractedVertex);
     contractedVertex.visible = true;
     return contracted;
 }
@@ -463,7 +498,7 @@ function containsEdgeWithNode(path, vertex) {
     return false;
 }
 
-function liftPathWithBlossom(cy, augPath, blossom) {
+function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contractedGraph) {
     let lifted = [];
     let contractedNode = blossom[0];
     for (let i = 0; i < augPath.length; ++i) {
@@ -526,19 +561,19 @@ function liftPathWithBlossom(cy, augPath, blossom) {
             lifted.push(augPath[i]);
             cy.getElementById(augPath[i].value).show();
         }
-        for (let node of blossom) {
-            cy.getElementById(node.value).show();
-        }
-        for (let edge of notContractedGraph.edgeSet) {
-            visual.drawShowingEdge(edge.firstVertex, edge.secondVertex, cy);
-        }
-        for (let edge of graph.edgeSet) {
-            if (!notContractedGraph.edgeSet.has(edge)) {
-                visual.drawRemovingEdge(edge.firstVertex, edge.secondVertex, cy);
-            }
-        }
-        cy.fit();
     }
+    for (let node of blossom) {
+        cy.getElementById(node.value).show();
+    }
+    for (let edge of notContractedGraph.edgeSet) {
+        visual.drawShowingEdge(edge.firstVertex, edge.secondVertex, cy);
+    }
+    for (let edge of contractedGraph.edgeSet) {
+        if (!notContractedGraph.edgeSet.has(edge)) {
+            visual.drawRemovingEdge(edge.firstVertex, edge.secondVertex, cy);
+        }
+    }
+    cy.fit();
     drawAugmentingPath(lifted, cy);
     return lifted;
 }
