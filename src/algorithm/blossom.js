@@ -18,6 +18,7 @@ let unmarkedEdges;
 let nodesToCheck;
 let augPath = [];
 let adjacentEdges = new Set([]);
+let matchings = [];
 
 let v;
 
@@ -139,7 +140,7 @@ function edgeProcessing(cy, source, target) {
             let forest = getForest();
             drawAddingEdgeToForest(forest, v, w, rootMap, childMap, parentMap);
             drawAddingEdgeToForest(forest, w, x, rootMap, childMap, parentMap);
-            if (adjacentEdges.size === 1) {
+            if (adjacentEdges.size === 0) {
                 for (let node of nodesToCheck) {
                     if (node.value !== v.value) {
                         cy.getElementById(node.value).selectify();
@@ -149,18 +150,17 @@ function edgeProcessing(cy, source, target) {
         } else {
             if (heightMap.get(w) % 2 === 0) {
                 if (rootMap.get(v) !== rootMap.get(w)) {
-                    augPath = returnAugPath(graph, rootMap, parentMap, heightMap, v, w);
                     for (let node of cy.nodes()) {
+                        node.unselect();
                         node.unselectify();
                     }
                     for (let edge of cy.edges()) {
+                        edge.unselect();
                         edge.unselectify();
                     }
-                    matching = addAltEdges(augPath, graph, matching);
                     visual.unColorAdjacentEdges(cy, matching);
-                    visual.drawAugmentingPath(augPath, cy);
-                    visual.finalColoring(cy, matching);
                     let wasBlossomed;
+                    augPath = returnAugPath(graph, rootMap, parentMap, heightMap, v, w);
                     for (let i = blossoms.length - 1; i >= 0; --i) {
                         if (containsEdgeWithNode(augPath, contractedVertexes[i])) {
                             wasBlossomed = true;
@@ -173,11 +173,17 @@ function edgeProcessing(cy, source, target) {
                     }
                     if (wasBlossomed) {
                         graph = graphConditions[0];
+                        matching = matchings[0];
                         blossoms = [];
                         contractedVertexes = [];
                         graphConditions = [];
+                        matchings = [];
+                    } else {
+                        visual.drawAugmentingPath(augPath, cy);
                     }
+                    matching = addAltEdges(augPath, graph, matching);
                     let graphToCheck = graph;
+                    visual.finalColoring(cy, matching);
                     if (graphConditions.length > 0) {
                         graphToCheck = graphConditions[0];
                     }
@@ -422,6 +428,7 @@ function blossomRecursion(cy, matching,
     let contractedGraph = contractBlossom(graph, blossomVertexes, cy);
     notContractedGraph = graph;
     graphConditions.push(graph);
+    matchings.push(matching);
     graph = contractedGraph;
     let contractedVertex = contractedGraph.getContractedVertex();
     for (let node of blossomVertexes) {
@@ -432,6 +439,7 @@ function blossomRecursion(cy, matching,
     cy.fit();
     let contractedMatching = contractMatching(contractedGraph, contrMatching, blossomVertexes, contractedVertex);
     contrMatching = contractedMatching;
+    //this.matching = contractedMatching;
     findAugPathWithBlossom(graph, contractedMatching, blossomVertexes, cy);
     if (containsEdgeWithNode(augPath, contractedVertex)) {
         augPath = liftPathWithBlossom(cy, augPath, blossomVertexes, graph);
@@ -657,73 +665,4 @@ module.exports = {
 
 function start(graph, cy) {
     blossomAlgorithm(graph, cy);
-    //console.log("---------Result-------");
-    //console.log("Graph Matching size: " + matching.size);
-    //console.log(matching);
 }
-
-/*function main() {
-    //let graph = new Graph();
-    /*graph.addEdgeByTwoVertexes(1, 2);
-    graph.addEdgeByTwoVertexes(2, 3);
-    graph.addEdgeByTwoVertexes(3, 4);
-    graph.addEdgeByTwoVertexes(4, 5);
-    graph.addEdgeByTwoVertexes(5, 1);
-    graph.addEdgeByTwoVertexes(3, 6);
-    graph.addEdgeByTwoVertexes(6, 7);*/
-
-/*graph.addEdgeByTwoVertexes(1, 2);
-graph.addEdgeByTwoVertexes(2, 3);
-graph.addEdgeByTwoVertexes(3, 4);
-graph.addEdgeByTwoVertexes(4, 5);
-graph.addEdgeByTwoVertexes(5, 6);
-graph.addEdgeByTwoVertexes(6, 7);
-graph.addEdgeByTwoVertexes(3, 7);
-graph.addEdgeByTwoVertexes(5, 8);
-graph.addEdgeByTwoVertexes(8, 9);
-graph.addEdgeByTwoVertexes(9, 10);*/
-
-/*graph.addEdgeByTwoVertexes(1, 2);
-graph.addEdgeByTwoVertexes(2, 3);
-graph.addEdgeByTwoVertexes(3, 4);
-graph.addEdgeByTwoVertexes(4, 5);
-graph.addEdgeByTwoVertexes(5, 6);
-graph.addEdgeByTwoVertexes(6, 7);
-graph.addEdgeByTwoVertexes(3, 7);
-graph.addEdgeByTwoVertexes(7, 8);
-graph.addEdgeByTwoVertexes(8, 9);
-graph.addEdgeByTwoVertexes(9, 10);*/
-
-/*graph.addEdgeByTwoVertexes(1, 4);
-graph.addEdgeByTwoVertexes(4, 5);
-graph.addEdgeByTwoVertexes(5, 6);
-graph.addEdgeByTwoVertexes(6, 10);
-graph.addEdgeByTwoVertexes(10, 9);
-graph.addEdgeByTwoVertexes(9, 8);
-graph.addEdgeByTwoVertexes(8, 7);
-graph.addEdgeByTwoVertexes(7, 4);
-graph.addEdgeByTwoVertexes(5, 9);
-graph.addEdgeByTwoVertexes(6, 3);
-graph.addEdgeByTwoVertexes(3, 2);
-graph.addEdgeByTwoVertexes(3, 10);*/
-
-/*graph.addEdgeByTwoVertexes(1, 2);
-graph.addEdgeByTwoVertexes(2, 3);
-graph.addEdgeByTwoVertexes(3, 4);
-graph.addEdgeByTwoVertexes(4, 5);
-graph.addEdgeByTwoVertexes(5, 6);
-graph.addEdgeByTwoVertexes(6, 7);
-graph.addEdgeByTwoVertexes(7, 8);
-graph.addEdgeByTwoVertexes(8, 9);
-graph.addEdgeByTwoVertexes(6, 10);
-graph.addEdgeByTwoVertexes(4, 11);
-graph.addEdgeByTwoVertexes(5, 12);
-graph.addEdgeByTwoVertexes(3, 7);*/
-
-/*let matching = blossomAlgorithm(graph);
-console.log("---------Result-------");
-console.log("Graph Matching size: " + matching.size);
-console.log(matching);*/
-//}
-
-//main();
