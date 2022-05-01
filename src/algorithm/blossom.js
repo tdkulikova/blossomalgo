@@ -54,7 +54,6 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
     outputMatching();
     let number = 0;
     for (let vertex of exposedVertexes) {
-        console.log("Added to forest: " + vertex);
         drawAddingNodeToForest(getForest(), vertex, exposedVertexes.size, number);
         rootMap.set(vertex, vertex);
         parentMap.set(vertex, null);
@@ -88,8 +87,7 @@ let contrMatching = matching;
 
 function vertexProcessing(cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
-    console.log("Working on vertex " + clickedNode);
-    document.getElementById('algoSvg').innerText = "Working on vertex " + clickedNode;
+    document.getElementById('algoSvg').innerText = "Working on vertex " + clickedNode +"\n";
     adjacentEdges = graph.getAdjacentEdges(v, matching);
     if (adjacentEdges.size === 0) {
         cy.getElementById(v.value).style({
@@ -122,7 +120,7 @@ function edgeProcessing(cy, source, target) {
     if (unmarkedEdges.has(selectedEdge)) {
         adjacentEdges.delete(selectedEdge);
         w = selectedEdge.getOtherEnd(v);
-        console.log("    Looking at vertices " + v + " and " + w);
+        document.getElementById('algoSvg').innerText += "Looking at vertices " + v + " and " + w + "\n";
         if (!rootMap.has(w)) {
             let x = findOtherNodeInMatching(matching, w);
             addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
@@ -140,6 +138,8 @@ function edgeProcessing(cy, source, target) {
             }
         } else {
             if (heightMap.get(w) % 2 === 0) {
+                document.getElementById('algoSvg').innerText +=
+                    "The distance between the "  + w + "and the root of the tree is even, so we have found tha augmenting path" + "\n";
                 if (rootMap.get(v) !== rootMap.get(w)) {
                     for (let node of cy.nodes()) {
                         node.unselect();
