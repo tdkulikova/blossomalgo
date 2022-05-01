@@ -62,15 +62,6 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
         heightMap.set(vertex, 0);
         ++number;
     }
-    /*for (let i = 0; i < exposedVertexes; ++i) {
-        forest.add({
-            group: 'edges',
-            data: {source: exposedVertexes[i].value, target: exposedVertexes[i + 1].value},
-            style: {
-                visibility: 'hidden'
-            }
-        })
-    }*/
     outputAvailableVertexes(nodesToCheck);
     if (nodesToCheck.size === 0) {
         console.log("The matching is found!");
@@ -190,6 +181,16 @@ function edgeProcessing(cy, source, target) {
                     if (checking(graphToCheck, matching)) {
                         findAugPath(graph, matching, [], cy);
                     } else {
+                        if (blossoms.length > 0) {
+                            for (let i = blossoms.length - 1; i >= 0; --i) {
+                                if (i === blossoms.length - 1) {
+                                    augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
+                                } else {
+                                    augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
+                                }
+                            }
+                        }
+                        matching = addAltEdges(augPath, graph, matching);
                         console.log("Matching is found!");
                     }
                 } else {
@@ -632,6 +633,7 @@ module.exports = {
             node.unselectify();
         }
         for (let edge of cy.edges()) {
+            edge.unselect();
             edge.unselectify();
         }
         cy.on('select', 'node', function (evt) {
