@@ -139,7 +139,7 @@ function edgeProcessing(cy, source, target) {
         } else {
             if (heightMap.get(w) % 2 === 0) {
                 document.getElementById('algoSvg').innerText +=
-                    "The distance between the "  + w + "and the root of the tree is even, so we have found tha augmenting path" + "\n";
+                    "The distance between the "  + w + "and the root of the tree is even, so we have found the augmenting path" + "\n";
                 if (rootMap.get(v) !== rootMap.get(w)) {
                     for (let node of cy.nodes()) {
                         node.unselect();
@@ -179,6 +179,7 @@ function edgeProcessing(cy, source, target) {
                         graphToCheck = graphConditions[0];
                     }
                     if (checking(graphToCheck, matching)) {
+                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n";
                         findAugPath(graph, matching, [], cy);
                     } else {
                         if (blossoms.length > 0) {
@@ -191,12 +192,13 @@ function edgeProcessing(cy, source, target) {
                             }
                         }
                         matching = addAltEdges(augPath, graph, matching);
+                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n";
                         console.log("Matching is found!");
                     }
                 } else {
+                    document.getElementById('algoSvg').innerText += "The blossom (the odd cycle) is found!"
                     blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
                 }
-                console.log("augPath: " + augPath + "\n");
                 return augPath;
             } else {
                 console.log("We do nothing");
