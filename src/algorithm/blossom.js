@@ -128,6 +128,7 @@ function edgeProcessing(cy, source, target) {
             graph.getEdge(v, graph.getVertex(parseInt(source.toString(), 10)));
     }
     if (unmarkedEdges.has(selectedEdge)) {
+        adjacentEdges.delete(selectedEdge);
         w = selectedEdge.getOtherEnd(v);
         console.log("    Looking at vertices " + v + " and " + w);
         if (!rootMap.has(w)) {
@@ -159,8 +160,10 @@ function edgeProcessing(cy, source, target) {
                     visual.unColorAdjacentEdges(cy, matching);
                     visual.drawAugmentingPath(augPath, cy);
                     visual.finalColoring(cy, matching);
+                    let wasBlossomed;
                     for (let i = blossoms.length - 1; i >= 0; --i) {
                         if (containsEdgeWithNode(augPath, contractedVertexes[i])) {
+                            wasBlossomed = true;
                             if (i === blossoms.length - 1) {
                                 augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
                             } else {
@@ -168,9 +171,17 @@ function edgeProcessing(cy, source, target) {
                             }
                         }
                     }
-                    blossoms = [];
-                    contractedVertexes = [];
-                    if (checking(graph, matching)) {
+                    if (wasBlossomed) {
+                        graph = graphConditions[0];
+                        blossoms = [];
+                        contractedVertexes = [];
+                        graphConditions = [];
+                    }
+                    let graphToCheck = graph;
+                    if (graphConditions.length > 0) {
+                        graphToCheck = graphConditions[0];
+                    }
+                    if (checking(graphToCheck, matching)) {
                         findAugPath(graph, matching, [], cy);
                     } else {
                         console.log("Matching is found!");
@@ -185,7 +196,7 @@ function edgeProcessing(cy, source, target) {
             }
         }
     }
-    adjacentEdges.delete(selectedEdge);
+    //adjacentEdges.delete(selectedEdge);
     visual.unColorEdge(selectedEdge, cy);
     unmarkedEdges.delete(selectedEdge);
     if (adjacentEdges.size === 0) {
@@ -197,8 +208,6 @@ function edgeProcessing(cy, source, target) {
                 cy.getElementById(node.value).selectify();
             }
         }
-    } else {
-        //visual.colorAdjacentEdges(cy);
     }
 }
 

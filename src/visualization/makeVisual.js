@@ -126,7 +126,6 @@ module.exports = {
     },
 
     drawAddingToForest: function (v, w, x, cy) {
-
         cy.getElementById(v.value).style({
             'background-color': 'green'
         })
@@ -148,7 +147,8 @@ module.exports = {
                 })
             }
         }
-    },
+        }
+    ,
 
     drawRemovingEdge: function (firstVertex, secondVertex, cy) {
         for (let edge of cy.edges()) {
