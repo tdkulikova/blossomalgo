@@ -598,7 +598,15 @@ function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contracte
         visual.drawShowingEdge(edge.firstVertex, edge.secondVertex, cy);
     }
     for (let edge of contractedGraph.edgeSet) {
-        if (!notContractedGraph.edgeSet.has(edge)) {
+        let hasNotContractedGraph = false;
+        for (let edgeNot of notContractedGraph.edgeSet) {
+            if (edge.firstVertex.value === edgeNot.firstVertex.value &&
+                edge.secondVertex.value === edgeNot.secondVertex.value || edge.secondVertex.value === edgeNot.firstVertex.value &&
+                edge.firstVertex.value === edgeNot.secondVertex.value) {
+                hasNotContractedGraph = true;
+            }
+        }
+        if (!hasNotContractedGraph) {
             visual.drawRemovingEdge(edge.firstVertex, edge.secondVertex, cy);
         }
     }
