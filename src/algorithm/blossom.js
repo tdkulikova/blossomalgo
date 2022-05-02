@@ -87,7 +87,7 @@ let contrMatching = matching;
 
 function vertexProcessing(cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
-    document.getElementById('algoSvg').innerText = "Working on vertex " + clickedNode +"\n";
+    document.getElementById('algoSvg').innerText = "Working on vertex " + clickedNode +"\n\n";
     adjacentEdges = graph.getAdjacentEdges(v, matching);
     if (adjacentEdges.size === 0) {
         cy.getElementById(v.value).style({
@@ -120,8 +120,9 @@ function edgeProcessing(cy, source, target) {
     if (unmarkedEdges.has(selectedEdge)) {
         adjacentEdges.delete(selectedEdge);
         w = selectedEdge.getOtherEnd(v);
-        document.getElementById('algoSvg').innerText += "Looking at vertices " + v + " and " + w + "\n";
+        document.getElementById('algoSvg').innerText = "Looking at vertices " + v + " and " + w + "\n\n";
         if (!rootMap.has(w)) {
+
             let x = findOtherNodeInMatching(matching, w);
             addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
             nodesToCheck.add(x);
@@ -129,6 +130,8 @@ function edgeProcessing(cy, source, target) {
             let forest = getForest();
             drawAddingEdgeToForest(forest, v, w, rootMap, childMap, parentMap);
             drawAddingEdgeToForest(forest, w, x, rootMap, childMap, parentMap);
+            document.getElementById('algoSvg').innerText += "The vertex " + w + "is in the matching, so we have found the adjacent vertex " + x + "which is also in the matching\n\n";
+            document.getElementById('algoSvg').innerText += "Vertexes " + v + " , " + w + " , " + x + " added to forest\n\n";
             if (adjacentEdges.size === 0) {
                 for (let node of nodesToCheck) {
                     if (node.value !== v.value) {
@@ -139,7 +142,7 @@ function edgeProcessing(cy, source, target) {
         } else {
             if (heightMap.get(w) % 2 === 0) {
                 document.getElementById('algoSvg').innerText +=
-                    "The distance between the "  + w + "and the root of the tree is even, so we have found the augmenting path" + "\n";
+                    "The distance between the "  + w + "and the root of the tree is even, so we have found the augmenting path" + "\n\n";
                 if (rootMap.get(v) !== rootMap.get(w)) {
                     for (let node of cy.nodes()) {
                         node.unselect();
@@ -179,7 +182,7 @@ function edgeProcessing(cy, source, target) {
                         graphToCheck = graphConditions[0];
                     }
                     if (checking(graphToCheck, matching)) {
-                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n";
+                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         findAugPath(graph, matching, [], cy);
                     } else {
                         if (blossoms.length > 0) {
@@ -192,11 +195,11 @@ function edgeProcessing(cy, source, target) {
                             }
                         }
                         matching = addAltEdges(augPath, graph, matching);
-                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n";
+                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         console.log("Matching is found!");
                     }
                 } else {
-                    document.getElementById('algoSvg').innerText += "The blossom (the odd cycle) is found!"
+                    document.getElementById('algoSvg').innerText += "The blossom (the odd cycle) is found!\n\n"
                     blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
                 }
                 return augPath;
@@ -205,7 +208,6 @@ function edgeProcessing(cy, source, target) {
             }
         }
     }
-    //adjacentEdges.delete(selectedEdge);
     visual.unColorEdge(selectedEdge, cy);
     unmarkedEdges.delete(selectedEdge);
     if (adjacentEdges.size === 0) {
@@ -346,8 +348,6 @@ function findOtherNodeInMatching(edges, vertex) {
 }
 
 function addToForest(rootMap, parentMap, heightMap, childMap, v, w, x) {
-    console.log("    Adding edges to forest");
-    console.log("    v: " + v + " w: " + w + " x: " + x);
     let root = rootMap.get(v);
     rootMap.set(w, root);
     rootMap.set(x, root);
@@ -396,7 +396,7 @@ function blossomRecursion(cy, matching,
     // Construct blossom
     let root = rootMap.get(v);
     let blossomVertexes = [];
-    console.log("Blossom is: ");
+    document.getElementById('algoSvg').innerText += "Blossom is: \n";
     let curr = v;
     while (curr !== root) {
         blossomVertexes.push(curr);
@@ -425,9 +425,8 @@ function blossomRecursion(cy, matching,
     globalBlossom = blossomVertexes;
     blossoms.push(blossomVertexes);
     for (let i = 0; i < correctedBlossom.length; ++i) {
-        console.log(correctedBlossom[i] + " ");
+        document.getElementById('algoSvg').innerText += correctedBlossom[i] + " " + "\n";
     }
-    console.log();
     let contractedGraph = contractBlossom(graph, blossomVertexes, cy);
     notContractedGraph = graph;
     graphConditions.push(graph);
@@ -442,11 +441,9 @@ function blossomRecursion(cy, matching,
     cy.fit();
     let contractedMatching = contractMatching(contractedGraph, contrMatching, blossomVertexes, contractedVertex);
     contrMatching = contractedMatching;
-    //this.matching = contractedMatching;
     findAugPathWithBlossom(graph, contractedMatching, blossomVertexes, cy);
     if (containsEdgeWithNode(augPath, contractedVertex)) {
         augPath = liftPathWithBlossom(cy, augPath, blossomVertexes, graph);
-        //console.log("Lifted augmenting path is: " + augPath);
     }
     return augPath;
 }
@@ -454,7 +451,7 @@ function blossomRecursion(cy, matching,
 function contractBlossom(graph, blossom, cy) {
     let contracted = new Graph();
     contractedVertex = blossom[0];
-    console.log("Beginning contraction to " + contractedVertex);
+    document.getElementById('algoSvg').innerText += "Beginning contraction to " + contractedVertex + "\n\n";
     let allEdges = graph.getAllEdges();
     for (let edge of allEdges) {
         contracted.addEdge(edge);
@@ -604,7 +601,7 @@ function findOutgoingIndex(vertex, blossom, graph) {
             return i;
         }
     }
-    console.log("Blossom lifting error");
+    document.getElementById('algoSvg').innerText += "Blossom lifting error!\n\n";
     return -1;
 }
 
