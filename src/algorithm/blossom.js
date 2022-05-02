@@ -19,6 +19,13 @@ let nodesToCheck;
 let augPath = [];
 let adjacentEdges = new Set([]);
 let matchings = [];
+let globalBlossom = [];
+let notContractedGraph;
+let contractedVertex;
+let blossoms = [];
+let contractedVertexes = [];
+let graphConditions = [];
+
 
 let v;
 
@@ -100,13 +107,6 @@ function vertexProcessing(cy) {
     }
 }
 
-let globalBlossom = [];
-let notContractedGraph;
-let contractedVertex;
-let blossoms = [];
-let contractedVertexes = [];
-let graphConditions = [];
-
 function edgeProcessing(cy, source, target) {
     let w;
     let selectedEdge;
@@ -120,30 +120,16 @@ function edgeProcessing(cy, source, target) {
     if (unmarkedEdges.has(selectedEdge)) {
         adjacentEdges.delete(selectedEdge);
         w = selectedEdge.getOtherEnd(v);
-        document.getElementById('algoSvg').innerText = "Looking at vertices " + v + " and " + w + "\n\n";
+        document.getElementById('algoSvg').innerText = "Looking at vertexes " + v + " and " + w + "\n\n";
         if (!rootMap.has(w)) {
-
-            let x = findOtherNodeInMatching(matching, w);
-            addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
-            nodesToCheck.add(x);
-            visual.drawAddingToForest(v, w, x, cy);
-            let forest = getForest();
-            drawAddingEdgeToForest(forest, v, w, rootMap, childMap, parentMap);
-            drawAddingEdgeToForest(forest, w, x, rootMap, childMap, parentMap);
-            document.getElementById('algoSvg').innerText += "The vertex " + w + "is in the matching, so we have found the adjacent vertex " + x + "which is also in the matching\n\n";
-            document.getElementById('algoSvg').innerText += "Vertexes " + v + " , " + w + " , " + x + " added to forest\n\n";
-            if (adjacentEdges.size === 0) {
-                for (let node of nodesToCheck) {
-                    if (node.value !== v.value) {
-                        cy.getElementById(node.value).selectify();
-                    }
-                }
-            }
+            secondVertexInMatching(w, cy);
         } else {
             if (heightMap.get(w) % 2 === 0) {
-                document.getElementById('algoSvg').innerText +=
-                    "The distance between the "  + w + "and the root of the tree is even, so we have found the augmenting path" + "\n\n";
                 if (rootMap.get(v) !== rootMap.get(w)) {
+                    document.getElementById('algoSvg').innerText +=
+                        "The distance between the "  + w + "and the root of the tree is even\n Vertexes " + v + " and " + w +
+                        "have different roots \n" +
+                        "So we have found the augmenting path" + "\n\n";
                     for (let node of cy.nodes()) {
                         node.unselect();
                         node.unselectify();
@@ -155,6 +141,7 @@ function edgeProcessing(cy, source, target) {
                     visual.unColorAdjacentEdges(cy, matching);
                     let wasBlossomed;
                     augPath = returnAugPath(graph, rootMap, parentMap, heightMap, v, w);
+                    document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                     for (let i = blossoms.length - 1; i >= 0; --i) {
                         if (containsEdgeWithNode(augPath, contractedVertexes[i])) {
                             wasBlossomed = true;
@@ -163,6 +150,7 @@ function edgeProcessing(cy, source, target) {
                             } else {
                                 augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
                             }
+                            document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         }
                     }
                     if (wasBlossomed) {
@@ -182,7 +170,7 @@ function edgeProcessing(cy, source, target) {
                         graphToCheck = graphConditions[0];
                     }
                     if (checking(graphToCheck, matching)) {
-                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
+                        //document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         findAugPath(graph, matching, [], cy);
                     } else {
                         if (blossoms.length > 0) {
@@ -193,12 +181,15 @@ function edgeProcessing(cy, source, target) {
                                     augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
                                 }
                             }
+                            document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         }
                         matching = addAltEdges(augPath, graph, matching);
-                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         console.log("Matching is found!");
                     }
                 } else {
+                    document.getElementById('algoSvg').innerText +=
+                        "The distance between the "  + w + "and the root of the tree is even\n Vertexes " + v + " and " + w +
+                        "have the same root\n";
                     document.getElementById('algoSvg').innerText += "The blossom (the odd cycle) is found!\n\n"
                     blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
                 }
@@ -216,6 +207,25 @@ function edgeProcessing(cy, source, target) {
             findAugPath(graph, [], cy)
         } else {
             for (let node of nodesToCheck) {
+                cy.getElementById(node.value).selectify();
+            }
+        }
+    }
+}
+
+function secondVertexInMatching(w, cy) {
+    let x = findOtherNodeInMatching(matching, w);
+    addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
+    nodesToCheck.add(x);
+    visual.drawAddingToForest(v, w, x, cy);
+    let forest = getForest();
+    drawAddingEdgeToForest(forest, v, w, rootMap, childMap, parentMap);
+    drawAddingEdgeToForest(forest, w, x, rootMap, childMap, parentMap);
+    document.getElementById('algoSvg').innerText += "The vertex " + w + "is in the matching, so we have found the adjacent vertex " + x + "which is also in the matching\n\n";
+    document.getElementById('algoSvg').innerText += "Vertexes " + v + " , " + w + " , " + x + " added to forest\n\n";
+    if (adjacentEdges.size === 0) {
+        for (let node of nodesToCheck) {
+            if (node.value !== v.value) {
                 cy.getElementById(node.value).selectify();
             }
         }
@@ -425,8 +435,9 @@ function blossomRecursion(cy, matching,
     globalBlossom = blossomVertexes;
     blossoms.push(blossomVertexes);
     for (let i = 0; i < correctedBlossom.length; ++i) {
-        document.getElementById('algoSvg').innerText += correctedBlossom[i] + " " + "\n";
+        document.getElementById('algoSvg').innerText += correctedBlossom[i] + " ";
     }
+    document.getElementById('algoSvg').innerText += "\n";
     let contractedGraph = contractBlossom(graph, blossomVertexes, cy);
     notContractedGraph = graph;
     graphConditions.push(graph);
@@ -451,7 +462,7 @@ function blossomRecursion(cy, matching,
 function contractBlossom(graph, blossom, cy) {
     let contracted = new Graph();
     contractedVertex = blossom[0];
-    document.getElementById('algoSvg').innerText += "Beginning contraction to " + contractedVertex + "\n\n";
+    document.getElementById('algoSvg').innerText += "Contraction to " + contractedVertex + "\n\n";
     let allEdges = graph.getAllEdges();
     for (let edge of allEdges) {
         contracted.addEdge(edge);
@@ -518,6 +529,7 @@ function containsEdgeWithNode(path, vertex) {
 function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contractedGraph) {
     let lifted = [];
     let contractedNode = blossom[0];
+    document.getElementById('algoSvg').innerText += "Lifting blossom " + blossom + "\n";
     for (let i = 0; i < augPath.length; ++i) {
         // lift the blossom
         if (augPath[i] === contractedNode) {
