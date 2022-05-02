@@ -18,10 +18,19 @@ module.exports = {
         let generateButton = document.querySelector("#button-generate");
         generateButton.addEventListener("click", function () {
             graphGenerator();
-
+            document.getElementById('button-start').disabled = false;
         })
         let startAlgorithmButton = document.querySelector("#button-start");
         startAlgorithmButton.addEventListener("click", function () {
+            for (let node of graph.nodes()) {
+                node.unselect();
+            }
+            for (let edge of graph.edges()) {
+                edge.unselect();
+            }
+            document.getElementById('button-start').disabled = true;
+            document.getElementById('button-create').disabled = true;
+            document.getElementById('button-generate').disabled = true;
             getGraphFromCanvas(graph);
         })
     }
@@ -32,16 +41,8 @@ function graphGenerator() {
     graph.destroy();
     graph = cytoscape({
             container: document.getElementById('graphSvg'),
-
             minZoom: 0.1,
             maxZoom: 100,
-
-            // panningEnabled: false,
-            //boxSelectionEnabled: true,
-            //autounselectify: false,
-            //selectionType: 'additive',
-            //autoungrabify: true,
-
             layout: {
                 name: 'random'
             },
@@ -114,8 +115,6 @@ function graphGenerator() {
     ); // cytoscape*/);
 
     let graphSvg = document.querySelector('#graphSvg');
-    document.getElementById('algoSvg').innerHTML = '<b>Новое содержимое</b>';
-
     graph.startBatch();
     for (let i = 3; i <= nodesAmount; ++i) {
         graph.add(
@@ -157,35 +156,11 @@ function graphGenerator() {
 
 
 function initial() {
-    let nodeOptions = {
-        normal: {
-            bgColor: 'grey'
-        },
-        selected: {
-            bgColor: 'yellow'
-        }
-    };
-
-    let edgeOptions = {
-        selected: {
-            lineColor: 'yellow'
-        }
-    };
-
-    //graph.mount(document.getElementById('graphSvg'));
-
-    //cy.mount(document.getElementById("graphics"))
     let cy = cytoscape({
         container: document.getElementById('graphics'),
 
         minZoom: 0.1,
         maxZoom: 100,
-
-        // panningEnabled: false,
-        //boxSelectionEnabled: true,
-        //autounselectify: false,
-        //selectionType: 'additive',
-        //autoungrabify: true,
 
         layout: {
             name: 'random'
@@ -320,18 +295,11 @@ function initial() {
 
     let okButton = document.querySelector('#button-ok');
     okButton.addEventListener("click", function () {
+        document.getElementById('button-start').disabled = false;
         graph.unmount();
         graph = cytoscape({
-            //container: document.getElementById('graphSvg'),
-
             minZoom: 0.1,
             maxZoom: 100,
-
-            // panningEnabled: false,
-            //boxSelectionEnabled: true,
-            //autounselectify: false,
-            //selectionType: 'additive',
-            //autoungrabify: true,
 
             layout: {
                 name: 'random'
@@ -380,13 +348,11 @@ function initial() {
             ],
 
             elements: {
-                //selectable: false,
                 grabbable: false,
                 nodes: [], // nodes
                 edges: [] // edges
-            } // elements
-        }); // cytoscape*/);
-        //cy.mount(document.getElementById('graphSvg'));
+            }
+        });
         for (let node of cy.nodes()) {
             graph.add(node);
         }

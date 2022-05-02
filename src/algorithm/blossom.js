@@ -3,7 +3,7 @@ let Vertex = require("./vertex.js");
 let Edge = require("./edge.js");
 let cytoscape = require('cytoscape');
 
-let {getForest} = require("../visualization/forest");
+let {getForest, makeForest} = require("../visualization/forest");
 let visual = require("../visualization/makeVisual");
 const {drawAugmentingPath, drawAddingEdgeToForest, drawAddingNodeToForest} = require("../visualization/makeVisual");
 
@@ -25,7 +25,7 @@ let contractedVertex;
 let blossoms = [];
 let contractedVertexes = [];
 let graphConditions = [];
-
+let contrMatching = matching;
 
 let v;
 
@@ -70,6 +70,8 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
     }
     outputAvailableVertexes(nodesToCheck);
     if (nodesToCheck.size === 0) {
+        document.getElementById('button-create').disabled = false;
+        document.getElementById('button-generate').disabled = false;
         console.log("The matching is found!");
     }
 }
@@ -89,8 +91,6 @@ function findAugPathWithBlossom(contractedGraph, contractedMatching, blossomVert
         console.log("The matching is found!");
     }
 }
-
-let contrMatching = matching;
 
 function vertexProcessing(cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
@@ -184,6 +184,8 @@ function edgeProcessing(cy, source, target) {
                             document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         }
                         matching = addAltEdges(augPath, graph, matching);
+                        document.getElementById('button-create').disabled = false;
+                        document.getElementById('button-generate').disabled = false;
                         console.log("Matching is found!");
                     }
                 } else {
@@ -641,6 +643,23 @@ let graph = new Graph();
 
 module.exports = {
     getGraphFromCanvas: function (cy) {
+        graph = new Graph();
+        matching = new Set();
+        clickedNode = 0;
+        rootMap = new Map();
+        childMap = new Map();
+        parentMap = new Map();
+        heightMap = new Map();
+        exposedVertexes = new Set();
+        unmarkedEdges = new Set();
+        nodesToCheck = new Set();
+        augPath = [];
+        adjacentEdges = new Set([]);
+        matchings = [];
+        blossoms = [];
+        contractedVertexes = [];
+        graphConditions = [];
+        contrMatching = matching;
         for (let edge of cy.edges()) {
             graph.addEdgeByTwoVertexes(parseInt(edge.source().id()), parseInt(edge.target().id()));
         }

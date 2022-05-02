@@ -10,13 +10,13 @@ module.exports = class Graph {
     used = [];
 
     constructor() {
+        this.component = [];
         this.nodeMap = new Map();
         this.edgeSet = new Set();
         this.adjacencyList = new Map();
+        this.used = [];
         this.findComponents();
     }
-
-    component = [];
 
     dfs(v) {
         this.used[v.value - 1] = true;
@@ -40,6 +40,7 @@ module.exports = class Graph {
     }
 
     findComponents() {
+        this.components = [];
         for (let i = 0; i < this.nodeMap.size; ++i) {
             this.used[i] = false;
         }
