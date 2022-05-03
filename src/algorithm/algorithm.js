@@ -40,7 +40,7 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
         heightMap = new Map();
     }
     cleanForest();
-    manageExposedVertexes(cy);
+    manageExposedVertexes(blossomVertexes, cy);
 }
 
 function cleanForest() {
