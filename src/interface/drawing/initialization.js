@@ -217,9 +217,11 @@ function initial() {
     }); // cytoscape*/
 
     for (let node of graph.nodes()) {
+        node.selectify();
         cy.add(node);
     }
     for (let edge of graph.edges()) {
+        edge.selectify();
         cy.add(edge);
     }
     cy.center();

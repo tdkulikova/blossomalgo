@@ -147,8 +147,7 @@ module.exports = {
                 })
             }
         }
-        }
-    ,
+        },
 
     drawRemovingEdge: function (firstVertex, secondVertex, cy) {
         for (let edge of cy.edges()) {

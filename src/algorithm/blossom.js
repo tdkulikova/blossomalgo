@@ -30,15 +30,7 @@ let contrMatching = matching;
 let v;
 
 function blossomAlgorithm(graph, cy) {
-    findMaxMatching(graph, cy);
-}
-
-function findMaxMatching(graph, cy) {
     findAugPath(graph, matching, [], cy);
-}
-
-function isEmpty(list) {
-    return list.length === 0;
 }
 
 function findAugPath(graph, matching, blossomVertexes, cy) {
@@ -55,10 +47,11 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
     }
     unmarkedEdges = getUnmarkedEdges(graph);
     nodesToCheck = getExposedNodes(graph, blossomVertexes, childMap);
+    if (nodesToCheck.size === 0) {
+        finalOutput();
+    }
     visual.colorExposedVertexes(nodesToCheck, cy);
     exposedVertexes = getExposedNodes(graph, blossomVertexes, childMap);
-    console.log("Matching:\n");
-    outputMatching();
     let number = 0;
     for (let vertex of exposedVertexes) {
         drawAddingNodeToForest(getForest(), vertex, exposedVertexes.size, number);
@@ -68,33 +61,18 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
         heightMap.set(vertex, 0);
         ++number;
     }
-    outputAvailableVertexes(nodesToCheck);
-    if (nodesToCheck.size === 0) {
-        document.getElementById('button-create').disabled = false;
-        document.getElementById('button-generate').disabled = false;
-        console.log("The matching is found!");
-    }
 }
 
 function findAugPathWithBlossom(contractedGraph, contractedMatching, blossomVertexes, cy) {
-    let augPath = [];
-    let forest = getForest();
     unmarkedEdges = getUnmarkedEdges(graph);
     nodesToCheck = getExposedNodes(graph, blossomVertexes, childMap);
     visual.colorExposedVertexes(nodesToCheck, cy);
     exposedVertexes = getExposedNodes(graph, blossomVertexes, childMap);
-    console.log("Matching:\n");
-    outputMatching();
-    let number = 0;
-    outputAvailableVertexes(nodesToCheck);
-    if (nodesToCheck.size === 0) {
-        console.log("The matching is found!");
-    }
 }
 
 function vertexProcessing(cy) {
     v = graph.getVertex(parseInt(clickedNode.toString(), 10));
-    document.getElementById('algoSvg').innerText = "Working on vertex " + clickedNode +"\n\n";
+    document.getElementById('algoSvg').innerText = "Working on vertex " + clickedNode + "\n\n";
     adjacentEdges = graph.getAdjacentEdges(v, matching);
     if (adjacentEdges.size === 0) {
         cy.getElementById(v.value).style({
@@ -103,7 +81,6 @@ function vertexProcessing(cy) {
         findAugPath(graph, matching, [], cy);
     } else {
         visual.colorAdjacentEdges(cy, adjacentEdges, matching);
-        outputAvailableEdges(adjacentEdges);
     }
 }
 
@@ -117,108 +94,119 @@ function edgeProcessing(cy, source, target) {
         selectedEdge =
             graph.getEdge(v, graph.getVertex(parseInt(source.toString(), 10)));
     }
-    if (unmarkedEdges.has(selectedEdge)) {
-        adjacentEdges.delete(selectedEdge);
-        w = selectedEdge.getOtherEnd(v);
-        document.getElementById('algoSvg').innerText = "Looking at vertexes " + v + " and " + w + "\n\n";
-        if (!rootMap.has(w)) {
-            secondVertexInMatching(w, cy);
-        } else {
-            if (heightMap.get(w) % 2 === 0) {
-                if (rootMap.get(v) !== rootMap.get(w)) {
-                    document.getElementById('algoSvg').innerText +=
-                        "The distance between the "  + w + "and the root of the tree is even\n Vertexes " + v + " and " + w +
-                        "have different roots \n" +
-                        "So we have found the augmenting path" + "\n\n";
-                    for (let node of cy.nodes()) {
-                        node.unselect();
-                        node.unselectify();
+
+    adjacentEdges.delete(selectedEdge);
+    w = selectedEdge.getOtherEnd(v);
+    document.getElementById('algoSvg').innerText = "Looking at vertexes " + v + " and " + w + "\n\n";
+    if (!rootMap.has(w)) {
+        secondVertexInMatching(w, cy);
+    } else {
+        if (heightMap.get(w) % 2 === 0) {
+            if (rootMap.get(v) !== rootMap.get(w)) {
+                document.getElementById('algoSvg').innerText +=
+                    "The distance between the " + w + "and the root of the tree is even\n Vertexes " + v + " and " + w +
+                    "have different roots \n" +
+                    "So we have found the augmenting path" + "\n\n";
+                correctingNodesAndEdges(cy);
+                visual.unColorAdjacentEdges(cy, matching);
+                let wasBlossomed;
+                augPath = returnAugPath(graph, rootMap, parentMap, heightMap, v, w);
+                document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
+                for (let i = blossoms.length - 1; i >= 0; --i) {
+                    if (containsEdgeWithNode(augPath, contractedVertexes[i])) {
+                        wasBlossomed = true;
+                        if (i === blossoms.length - 1) {
+                            augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
+                        } else {
+                            augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
+                        }
+                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                     }
-                    for (let edge of cy.edges()) {
-                        edge.unselect();
-                        edge.unselectify();
-                    }
-                    visual.unColorAdjacentEdges(cy, matching);
-                    let wasBlossomed;
-                    augPath = returnAugPath(graph, rootMap, parentMap, heightMap, v, w);
-                    document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
-                    for (let i = blossoms.length - 1; i >= 0; --i) {
-                        if (containsEdgeWithNode(augPath, contractedVertexes[i])) {
-                            wasBlossomed = true;
+                }
+                if (wasBlossomed) {
+                    graph = graphConditions[0];
+                    matching = matchings[0];
+                    blossoms = [];
+                    contractedVertexes = [];
+                    graphConditions = [];
+                    matchings = [];
+                } else {
+                    visual.drawAugmentingPath(augPath, cy);
+                }
+                matching = addAltEdges(augPath, graph, matching);
+                let graphToCheck = graph;
+                visual.finalColoring(cy, matching);
+                if (graphConditions.length > 0) {
+                    graphToCheck = graphConditions[0];
+                }
+                if (checking(graphToCheck, matching)) {
+                    findAugPath(graph, matching, [], cy);
+                } else {
+                    if (blossoms.length > 0) {
+                        for (let i = blossoms.length - 1; i >= 0; --i) {
                             if (i === blossoms.length - 1) {
                                 augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
                             } else {
                                 augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
                             }
-                            document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                         }
-                    }
-                    if (wasBlossomed) {
-                        graph = graphConditions[0];
-                        matching = matchings[0];
-                        blossoms = [];
-                        contractedVertexes = [];
-                        graphConditions = [];
-                        matchings = [];
-                    } else {
-                        visual.drawAugmentingPath(augPath, cy);
+                        document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
                     }
                     matching = addAltEdges(augPath, graph, matching);
-                    let graphToCheck = graph;
-                    visual.finalColoring(cy, matching);
-                    if (graphConditions.length > 0) {
-                        graphToCheck = graphConditions[0];
-                    }
-                    if (checking(graphToCheck, matching)) {
-                        //document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
-                        findAugPath(graph, matching, [], cy);
-                    } else {
-                        if (blossoms.length > 0) {
-                            for (let i = blossoms.length - 1; i >= 0; --i) {
-                                if (i === blossoms.length - 1) {
-                                    augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
-                                } else {
-                                    augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
-                                }
-                            }
-                            document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
-                        }
-                        matching = addAltEdges(augPath, graph, matching);
-                        document.getElementById('button-create').disabled = false;
-                        document.getElementById('button-generate').disabled = false;
-                        console.log("Matching is found!");
-                    }
-                } else {
-                    document.getElementById('algoSvg').innerText +=
-                        "The distance between the "  + w + "and the root of the tree is even\n Vertexes " + v + " and " + w +
-                        "have the same root\n";
-                    document.getElementById('algoSvg').innerText += "The blossom (the odd cycle) is found!\n\n"
-                    blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
+                    finalOutput();
                 }
-                return augPath;
             } else {
-                console.log("We do nothing");
+                blossomFound(w, cy);
+            }
+            return augPath;
+        } else {
+            for (let node of cy.nodes()) {
+                node.selectify();
             }
         }
     }
     visual.unColorEdge(selectedEdge, cy);
-    unmarkedEdges.delete(selectedEdge);
     if (adjacentEdges.size === 0) {
         nodesToCheck.delete(v);
         if (nodesToCheck.size === 0) {
-            findAugPath(graph, [], cy)
-        } else {
-            for (let node of nodesToCheck) {
-                cy.getElementById(node.value).selectify();
-            }
+            visual.finalColoring(cy, matching);
+            finalOutput();
         }
     }
+}
+
+function finalOutput() {
+    document.getElementById('button-create').disabled = false;
+    document.getElementById('button-generate').disabled = false;
+    document.getElementById('algoSvg').innerText += "Matching is found!\n";
+    document.getElementById('algoSvg').innerText += "Matching Size: " + matching.size + "\n";
+}
+
+function correctingNodesAndEdges(cy) {
+    for (let node of cy.nodes()) {
+        node.unselect();
+        node.unselectify();
+    }
+    for (let edge of cy.edges()) {
+        edge.unselect();
+        edge.unselectify();
+    }
+}
+
+function blossomFound(w, cy) {
+    document.getElementById('algoSvg').innerText +=
+        "The distance between the " + w + "and the root of the tree is even\n Vertexes " + v + " and " + w +
+        "have the same root\n";
+    document.getElementById('algoSvg').innerText += "The blossom (the odd cycle) is found!\n\n"
+    blossom(matching, rootMap, parentMap, childMap, heightMap, v, w, cy);
 }
 
 function secondVertexInMatching(w, cy) {
     let x = findOtherNodeInMatching(matching, w);
     addToForest(rootMap, parentMap, heightMap, childMap, v, w, x);
-    nodesToCheck.add(x);
+    if (graph.getAdjacentEdges(x, matching).size > 0) {
+        nodesToCheck.add(x);
+    }
     visual.drawAddingToForest(v, w, x, cy);
     let forest = getForest();
     drawAddingEdgeToForest(forest, v, w, rootMap, childMap, parentMap);
@@ -255,6 +243,9 @@ function checkingComponent(component, matching) {
         }
         if (!isInMatching) {
             let edges = graph.getAdjacentEdges(node, matching);
+            for (let edge of edges) {
+
+            }
             if (edges.size !== 0) {
                 ++amount;
             }
@@ -266,23 +257,9 @@ function checkingComponent(component, matching) {
     return false;
 }
 
-function outputAvailableVertexes(nodesToCheck) {
-    console.log("Available vertexes: ")
-    for (let vertex of nodesToCheck) {
-        console.log(vertex.toString() + " ");
-    }
-}
-
-function outputAvailableEdges(adjacentEdges) {
-    console.log("Available edges: ")
-    for (let edge of adjacentEdges) {
-        console.log(edge.toString() + " ");
-    }
-}
-
 function outputMatching() {
     for (let edge of matching) {
-        console.log(edge.toString() + " ");
+        document.getElementById('algoSvg').innerText += edge.toString() + " ";
     }
 }
 
@@ -698,11 +675,12 @@ module.exports = {
             })
             edgeProcessing(cy, this.source().id(), this.target().id());
         });
-        start(graph, cy);
+        if (graph.nodeMap.size >= 2 && graph.edgeSet.size >= 1) {
+            blossomAlgorithm(graph, cy);
+        } else {
+            document.getElementById('algoSvg').innerText = "Your graph should have at least two vertexes and one edge"
+            document.getElementById('button-create').disabled = false;
+            document.getElementById('button-generate').disabled = false;
+        }
     }
-}
-
-
-function start(graph, cy) {
-    blossomAlgorithm(graph, cy);
 }
