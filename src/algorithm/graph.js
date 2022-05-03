@@ -155,10 +155,6 @@ module.exports = class Graph {
         this.contractedVertex = vertex;
     }
 
-    containsVertex(value) {
-        return this.nodeMap.has(value);
-    }
-
     toString() {
         this.nodeMap.toString();
     }

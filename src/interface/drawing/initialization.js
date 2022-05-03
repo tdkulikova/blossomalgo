@@ -1,6 +1,6 @@
 const cytoscape = require("cytoscape");
 
-const {getGraphFromCanvas} = require("../../algorithm/blossom");
+const {getGraphFromCanvas} = require("../../algorithm/algorithm");
 const Json = require("cytoscape/src/style/json");
 
 let cont = cytoscape();
