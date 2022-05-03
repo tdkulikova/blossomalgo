@@ -160,6 +160,8 @@ function edgeProcessing(cy, source, target) {
             }
             return augPath;
         } else {
+            document.getElementById('algoSvg').innerText +=
+                "The distance between the " + w + "and the root of the tree is odd, so we do nothing\n\n";
             for (let node of cy.nodes()) {
                 node.selectify();
             }
