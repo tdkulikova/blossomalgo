@@ -95,6 +95,13 @@ function foundNothing(selectedEdge, cy) {
         }
     }
 }
+function containsEdgeWithNode(path, vertex) {
+    for (let i = 0; i < path.length; ++i) {
+        if (path[i] === vertex)
+            return true;
+    }
+    return false;
+}
 
 function foundAugPath(cy, w) {
     document.getElementById('algoSvg').innerText +=
@@ -105,7 +112,18 @@ function foundAugPath(cy, w) {
     visual.unColorAdjacentEdges(cy, matching);
     augPath = auxiliaryFunc.returnAugPath(graph, rootMap, parentMap, heightMap, v, w);
     document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
-    let wasBlossomed = fullLiftingAfterAugPathSFound(cy);
+    let wasBlossomed = false;
+    for (let i = blossoms.length - 1; i >= 0; --i) {
+        if (auxiliaryFunc.containsEdgeWithNode(augPath, contractedVertexes[i])) {
+            wasBlossomed = true;
+            if (i === blossoms.length - 1) {
+                augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
+            } else {
+                augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
+            }
+            document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
+        }
+    }
     if (wasBlossomed) {
         graph = graphConditions[0];
         matching = matchingConditions[0];
@@ -142,22 +160,6 @@ function algorithmEnding(cy) {
     }
     matching = auxiliaryFunc.addAltEdges(augPath, graph, matching);
     auxiliaryFunc.finalOutput(matching);
-}
-
-function fullLiftingAfterAugPathSFound(cy) {
-    let wasBlossomed = false;
-    for (let i = blossoms.length - 1; i >= 0; --i) {
-        if (auxiliaryFunc.containsEdgeWithNode(augPath, contractedVertexes[i])) {
-            wasBlossomed = true;
-            if (i === blossoms.length - 1) {
-                augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graph);
-            } else {
-                augPath = liftPathWithBlossom(cy, augPath, blossoms[i], graphConditions[i], graphConditions[i + 1]);
-            }
-            document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
-        }
-    }
-    return wasBlossomed;
 }
 
 function edgeProcessing(cy, source, target) {
@@ -494,13 +496,52 @@ function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contracte
     for (let i = 0; i < augPath.length; ++i) {
         if (augPath[i] === contractedNode) {
             if (i === augPath.length - 1) {
-                liftingLastVertex(lifted, blossom, i, cy);
+                let outgoingIndex = auxiliaryFunc.findOutgoingIndex(augPath[i - 1], blossom, notContractedGraph);
+                if (outgoingIndex % 2 === 0) {
+                    for (let j = outgoingIndex; j >= 0; --j) {
+                        lifted.push(blossom[j]);
+                        cy.getElementById(blossom[j].value).show();
+                    }
+                } else {
+                    for (let j = outgoingIndex; j <= blossom.length - 1; ++j) {
+                        lifted.push(blossom[j]);
+                        cy.getElementById(blossom[j].value).show();
+                    }
+                    lifted.push(blossom[0]);
+                    cy.getElementById(blossom[0].value).show();
+                }
             } else {
                 if (i % 2 === 0) {
-                    liftingEventVertex(lifted, blossom, i, cy);
+                    let outgoingIndex = auxiliaryFunc.findOutgoingIndex(augPath[i + 1], blossom, notContractedGraph);
+                    if (outgoingIndex % 2 === 0) {
+                        for (let j = 0; j <= outgoingIndex; j++) {
+                            lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
+                        }
+                    } else {
+                        lifted.push(blossom[0]);
+                        cy.getElementById(blossom[0].value).show();
+                        for (let j = blossom.length - 1; j >= outgoingIndex; j--) {
+                            lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
+                        }
+                    }
                 }
                 if (i % 2 === 1) {
-                    liftingOddVertex(lifted, blossom, i, cy);
+                    let outgoingIndex = auxiliaryFunc.findOutgoingIndex(augPath[i + 1], blossom, notContractedGraph);
+                    if (outgoingIndex % 2 === 0) {
+                        for (let j = outgoingIndex; j >= 0; j--) {
+                            lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
+                        }
+                    } else {
+                        for (let j = outgoingIndex; j < blossom.length; j++) {
+                            lifted.push(blossom[j]);
+                            cy.getElementById(blossom[j].value).show();
+                        }
+                        lifted.push(blossom[0]);
+                        cy.getElementById(blossom[0].value).show();
+                    }
                 }
             }
         }
@@ -509,74 +550,12 @@ function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contracte
             cy.getElementById(augPath[i].value).show();
         }
     }
-    drawLiftingNodesAndEdges(blossom, cy);
-    removingExtraEdges(contractedGraph, cy);
-    cy.fit();
-    drawAugmentingPath(lifted, cy);
-    return lifted;
-}
-
-function liftingLastVertex(lifted, blossom, i, cy) {
-    let outgoingIndex = auxiliaryFunc.findOutgoingIndex(augPath[i - 1], blossom, notContractedGraph);
-    if (outgoingIndex % 2 === 0) {
-        for (let j = outgoingIndex; j >= 0; --j) {
-            lifted.push(blossom[j]);
-            cy.getElementById(blossom[j].value).show();
-        }
-    } else {
-        for (let j = outgoingIndex; j <= blossom.length - 1; ++j) {
-            lifted.push(blossom[j]);
-            cy.getElementById(blossom[j].value).show();
-        }
-        lifted.push(blossom[0]);
-        cy.getElementById(blossom[0].value).show();
-    }
-}
-
-function liftingEventVertex(lifted, blossom, i, cy) {
-    let outgoingIndex = auxiliaryFunc.findOutgoingIndex(augPath[i + 1], blossom, notContractedGraph);
-    if (outgoingIndex % 2 === 0) {
-        for (let j = 0; j <= outgoingIndex; j++) {
-            lifted.push(blossom[j]);
-            cy.getElementById(blossom[j].value).show();
-        }
-    } else {
-        lifted.push(blossom[0]);
-        cy.getElementById(blossom[0].value).show();
-        for (let j = blossom.length - 1; j >= outgoingIndex; j--) {
-            lifted.push(blossom[j]);
-            cy.getElementById(blossom[j].value).show();
-        }
-    }
-}
-
-function liftingOddVertex(lifted, blossom, i, cy) {
-    let outgoingIndex = auxiliaryFunc.findOutgoingIndex(augPath[i + 1], blossom, notContractedGraph);
-    if (outgoingIndex % 2 === 0) {
-        for (let j = outgoingIndex; j >= 0; j--) {
-            lifted.push(blossom[j]);
-            cy.getElementById(blossom[j].value).show();
-        }
-    } else {
-        for (let j = outgoingIndex; j < blossom.length; j++) {
-            lifted.push(blossom[j]);
-            cy.getElementById(blossom[j].value).show();
-        }
-        lifted.push(blossom[0]);
-        cy.getElementById(blossom[0].value).show();
-    }
-}
-
-function drawLiftingNodesAndEdges(blossom, cy) {
     for (let node of blossom) {
         cy.getElementById(node.value).show();
     }
     for (let edge of notContractedGraph.edgeSet) {
         visual.drawShowingEdge(edge.firstVertex, edge.secondVertex, cy);
     }
-}
-
-function removingExtraEdges(contractedGraph, cy) {
     for (let edge of contractedGraph.edgeSet) {
         let hasNotContractedGraph = false;
         for (let edgeNot of notContractedGraph.edgeSet) {
@@ -591,7 +570,12 @@ function removingExtraEdges(contractedGraph, cy) {
             visual.drawRemovingEdge(edge.firstVertex, edge.secondVertex, cy);
         }
     }
+    cy.fit();
+    drawAugmentingPath(lifted, cy);
+    return lifted;
 }
+
+
 
 
 

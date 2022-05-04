@@ -54,33 +54,6 @@ correctingNodesAndEdges:function(cy) {
     }
 },
 
-returnAugPath:function(graph, rootMap, parentMap, heightMap, v, w) {
-    let augPath = [];
-    let curr = v;
-    while (curr != null) {
-        augPath.push(curr);
-        curr = parentMap.get(curr);
-    }
-    augPath.reverse();
-    curr = w;
-    while (curr != null) {
-        augPath.push(curr);
-        curr = parentMap.get(curr);
-    }
-    return augPath;
-},
-
-addAltEdges:function(augPath, graph, matching) {
-    for (let i = 0; i < augPath.length - 1; i += 1) {
-        if (i % 2 === 0) {
-            matching.add(graph.getEdge(augPath[i], augPath[i + 1]));
-        }
-        if (i % 2 === 1) {
-            matching.delete(graph.getEdge(augPath[i], augPath[i + 1]));
-        }
-    }
-    return matching;
-},
 
 outputMatching:function(matching) {
     for (let edge of matching) {
@@ -107,7 +80,21 @@ containsEdgeWithNode:function(path, vertex) {
     }
     return false;
 },
-
+    returnAugPath:function(graph, rootMap, parentMap, heightMap, v, w) {
+    let augPath = [];
+    let curr = v;
+    while (curr != null) {
+        augPath.push(curr);
+        curr = parentMap.get(curr);
+    }
+    augPath.reverse();
+    curr = w;
+    while (curr != null) {
+        augPath.push(curr);
+        curr = parentMap.get(curr);
+    }
+    return augPath;
+},
 findOutgoingIndex:function(vertex, blossom, graph) {
     for (let i = 0; i < blossom.length; i++) {
         if (graph.getEdge(vertex, blossom[i]) != null) {
@@ -116,5 +103,17 @@ findOutgoingIndex:function(vertex, blossom, graph) {
     }
     document.getElementById('algoSvg').innerText += "Blossom lifting error!\n\n";
     return -1;
+},
+
+    addAltEdges:function (augPath, graph, matching) {
+    for (let i = 0; i < augPath.length - 1; i += 1) {
+        if (i % 2 === 0) {
+            matching.add(graph.getEdge(augPath[i], augPath[i + 1]));
+        }
+        if (i % 2 === 1) {
+            matching.delete(graph.getEdge(augPath[i], augPath[i + 1]));
+        }
+    }
+    return matching;
 },
 }
