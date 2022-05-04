@@ -446,7 +446,6 @@ function blossomRecursion(cy, matching,
         }
     }
     cy.fit();
-    contrMatching = matching;
     let contractedMatching = contractMatching(contractedGraph, contrMatching, blossomVertexes, contractedVertex);
     contrMatching = contractedMatching;
     findAugPathWithBlossom(graph, contractedMatching, blossomVertexes, cy);

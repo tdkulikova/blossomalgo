@@ -31,7 +31,7 @@ module.exports = {
                 }
             }
         }
-        /*let isInMatching = false;
+        let isInMatching = false;
         for (let ele of cy.edges()) {
             isInMatching = false;
             for (let edge of matching) {
@@ -45,7 +45,7 @@ module.exports = {
                     'line-color': 'red'
                 })
             }
-        }*/
+        }
     },
 
     unColorEdge: function (selectedEdge, cy) {
