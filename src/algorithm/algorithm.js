@@ -64,6 +64,7 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
 }
 
 function findAugPathWithBlossom(contractedGraph, contractedMatching, blossomVertexes, cy) {
+    visual.finalColoring(cy, contractedMatching);
     unmarkedEdges = getUnmarkedEdges(graph);
     nodesToCheck = getExposedNodes(graph, blossomVertexes, childMap);
     visual.colorExposedVertexes(nodesToCheck, cy);
@@ -246,6 +247,7 @@ function checkingComponent(component, matching) {
     for (let node of component) {
         let isInMatching = false;
         for (let edge of matching) {
+
             if (edge.firstVertex.value === node.value ||
                 edge.secondVertex.value === node.value) {
                 isInMatching = true;
@@ -444,6 +446,7 @@ function blossomRecursion(cy, matching,
         }
     }
     cy.fit();
+    contrMatching = matching;
     let contractedMatching = contractMatching(contractedGraph, contrMatching, blossomVertexes, contractedVertex);
     contrMatching = contractedMatching;
     findAugPathWithBlossom(graph, contractedMatching, blossomVertexes, cy);
@@ -476,8 +479,15 @@ function contractBlossom(graph, blossom, cy) {
             if (node !== blossom[prev] && node !== blossom[next]) {
                 removed = contracted.removeEdge(blossom[i], node);
                 visual.drawRemovingEdge(blossom[i], node, cy);
+                let isInBlossom = false;
+                for (let j = 0; j < blossom.length; ++j) {
+                    if (node.value === blossom[j].value) {
+                        isInBlossom = true;
+                    }
+                }
+                if (!isInBlossom) {
                 contracted.addEdge(new Edge(node, contractedVertex, false));
-                visual.drawAddingEdge(node, contractedVertex, cy);
+                visual.drawAddingEdge(node, contractedVertex, cy);}
             }
         }
     }
@@ -564,10 +574,20 @@ function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contracte
                 if (i % 2 === 1) {
                     let outgoingIndex = findOutgoingIndex(augPath[i + 1], blossom, notContractedGraph);
                     if (outgoingIndex % 2 === 0) {
+                        if (outgoingIndex === 0) {
+                            outgoingIndex = findIngoingIndex(augPath[i - 1], blossom, notContractedGraph);
+                        }
+                        if (outgoingIndex % 2 === 1) {
+                            for (let j = outgoingIndex; j < blossom.length; j++) {
+                                lifted.push(blossom[j]);
+                                cy.getElementById(blossom[j].value).show();
+                            }
+                            lifted.push(blossom[0]);
+                        } else {
                         for (let j = outgoingIndex; j >= 0; j--) {
                             lifted.push(blossom[j]);
                             cy.getElementById(blossom[j].value).show();
-                        }
+                        }}
                     } else {
                         for (let j = outgoingIndex; j < blossom.length; j++) {
                             lifted.push(blossom[j]);
@@ -618,6 +638,18 @@ function findOutgoingIndex(vertex, blossom, graph) {
     document.getElementById('algoSvg').innerText += "Blossom lifting error!\n\n";
     return -1;
 }
+
+function findIngoingIndex(vertex, blossom, graph) {
+    for (let i = 0; i < blossom.length; i++) {
+        if (graph.getEdge(blossom[i], vertex) != null) {
+            return i;
+        }
+    }
+    document.getElementById('algoSvg').innerText += "Blossom lifting error!\n\n";
+    return -1;
+}
+
+
 
 function addAltEdges(augPath, graph, matching) {
     for (let i = 0; i < augPath.length - 1; i += 1) {

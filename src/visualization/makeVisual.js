@@ -31,6 +31,21 @@ module.exports = {
                 }
             }
         }
+        /*let isInMatching = false;
+        for (let ele of cy.edges()) {
+            isInMatching = false;
+            for (let edge of matching) {
+                if (parseInt(ele.source().id()) === edge.firstVertex.value &&
+                    parseInt(ele.target().id()) === edge.secondVertex.value) {
+                    isInMatching = true;
+                }
+            }
+            if (isInMatching) {
+                ele.style({
+                    'line-color': 'red'
+                })
+            }
+        }*/
     },
 
     unColorEdge: function (selectedEdge, cy) {
