@@ -21,11 +21,13 @@ module.exports = {
     finalColoring: function (cy, matching) {
         for (let node of cy.nodes()) {
             for (let edge of matching) {
-                if (edge.firstVertex.value === parseInt(node.id(), 10) ||
-                    edge.secondVertex.value === parseInt(node.id(), 10)) {
-                    node.style({
-                        'background-color': 'red'
-                    })
+                if (edge !== undefined) {
+                    if (edge.firstVertex.value === parseInt(node.id(), 10) ||
+                        edge.secondVertex.value === parseInt(node.id(), 10)) {
+                        node.style({
+                            'background-color': 'red'
+                        })
+                    }
                 }
             }
         }
@@ -147,7 +149,7 @@ module.exports = {
                 })
             }
         }
-        },
+    },
 
     drawRemovingEdge: function (firstVertex, secondVertex, cy) {
         for (let edge of cy.edges()) {

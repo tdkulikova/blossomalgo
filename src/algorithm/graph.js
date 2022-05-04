@@ -22,19 +22,21 @@ module.exports = class Graph {
         this.used[v.value - 1] = true;
         this.component.push(v);
         let edges = new Set();
-        let map = this.adjacencyList.get(v);
-        map.forEach((value) => {
-            edges.add(value)
-        });
-        for (let edge of edges) {
-            let to;
-            if (edge.firstVertex !== v) {
-                to = edge.firstVertex;
-            } else {
-                to = edge.secondVertex;
-            }
-            if (!this.used[to.value - 1]) {
-                this.dfs(to);
+        if (this.adjacencyList.get(v)) {
+            let map = this.adjacencyList.get(v);
+            map.forEach((value) => {
+                edges.add(value)
+            });
+            for (let edge of edges) {
+                let to;
+                if (edge.firstVertex !== v) {
+                    to = edge.firstVertex;
+                } else {
+                    to = edge.secondVertex;
+                }
+                if (!this.used[to.value - 1]) {
+                    this.dfs(to);
+                }
             }
         }
     }
@@ -122,10 +124,11 @@ module.exports = class Graph {
 
     getAdjacentEdges(v, matching) {
         let list = new Set();
+        if (this.adjacencyList.get(v)) {
         let map = this.adjacencyList.get(v);
         map.forEach((value) => {
             if (!matching.has(value)) list.add(value)
-        });
+        });}
         return list;
     }
 
