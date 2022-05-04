@@ -64,7 +64,7 @@ function findAugPath(graph, matching, blossomVertexes, cy) {
 }
 
 function findAugPathWithBlossom(contractedGraph, contractedMatching, blossomVertexes, cy) {
-    visual.finalColoring(cy, contractedMatching);
+    visual.finalColoring(cy, matching);
     unmarkedEdges = getUnmarkedEdges(graph);
     nodesToCheck = getExposedNodes(graph, blossomVertexes, childMap);
     visual.colorExposedVertexes(nodesToCheck, cy);
