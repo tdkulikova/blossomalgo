@@ -159,10 +159,8 @@ function foundAugPath(cy, w) {
     augPath = auxiliaryFunc.returnAugPath(graph, rootMap, parentMap, heightMap, v, w);
     document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
     for (let i = blossoms.length - 1; i >= 0; --i) {
-        if (auxiliaryFunc.containsEdgeWithNode(augPath, contractedVertexes[i])) {
-            wasBlossomed = true;
-            lifting(i, cy);
-        }
+        wasBlossomed = true;
+        lifting(i, cy);
     }
     initializeOrDrawAugPath(wasBlossomed, cy);
     matching = auxiliaryFunc.addAltEdges(augPath, graph, matching);
@@ -340,7 +338,7 @@ function addToForest(rootMap, parentMap, heightMap, childMap, v, w, x) {
 }
 
 function blossomConstruction(cy, matching,
-                          rootMap, parentMap, childMap, heightMap, v, w) {
+                             rootMap, parentMap, childMap, heightMap, v, w) {
 
     let root = rootMap.get(v);
     let blossomVertexes = [];
@@ -435,8 +433,9 @@ function contractBlossom(graph, blossom, cy) {
                     }
                 }
                 if (!isInBlossom) {
-                contracted.addEdge(new Edge(node, contractedVertex, false));
-                visual.drawAddingEdge(node, contractedVertex, cy);}
+                    contracted.addEdge(new Edge(node, contractedVertex, false));
+                    visual.drawAddingEdge(node, contractedVertex, cy);
+                }
             }
         }
     }
@@ -522,10 +521,11 @@ function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contracte
                             }
                             lifted.push(blossom[0]);
                         } else {
-                        for (let j = outgoingIndex; j >= 0; j--) {
-                            lifted.push(blossom[j]);
-                            cy.getElementById(blossom[j].value).show();
-                        }}
+                            for (let j = outgoingIndex; j >= 0; j--) {
+                                lifted.push(blossom[j]);
+                                cy.getElementById(blossom[j].value).show();
+                            }
+                        }
                     } else {
                         for (let j = outgoingIndex; j < blossom.length; j++) {
                             lifted.push(blossom[j]);
@@ -536,8 +536,7 @@ function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contracte
                     }
                 }
             }
-        }
-        else {
+        } else {
             lifted.push(augPath[i]);
             cy.getElementById(augPath[i].value).show();
         }
@@ -643,7 +642,3 @@ module.exports = {
         }
     }
 }
-
-
-
-
