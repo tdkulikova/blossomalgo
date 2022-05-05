@@ -46,7 +46,7 @@ module.exports = {
         }
         return amount >= 2;
     },
-    findOtherNodeInMatching: function (edges, vertex) {
+    findAnotherNodeInMatching: function (edges, vertex) {
         for (let edge of edges) {
             if (edge.firstVertex === vertex) {
                 return edge.secondVertex;
@@ -109,5 +109,87 @@ module.exports = {
             curr = parentMap.get(curr);
         }
         return augPath;
+    },
+    unselectingVertexesAndEdges: function (cy) {
+        for (let node of cy.nodes()) {
+            node.unselectify();
+        }
+        for (let edge of cy.edges()) {
+            edge.unselect();
+            edge.unselectify();
+        }
+    },
+    contractMatching: function (contracted, matching, blossom, contractedVertex) {
+        let contractedMatching = new Set();
+        let blossomNodes = new Set();
+        for (let i = 0; i < blossom.length; ++i) {
+            blossomNodes.add(blossom[i]);
+        }
+        for (let match of matching) {
+            if (blossomNodes.has(match.firstVertex)
+                && !blossomNodes.has(match.secondVertex)) {
+                contractedMatching.add(contracted.getEdge(contractedVertex, match.secondVertex));
+            } else {
+                if (blossomNodes.has(match.secondVertex)
+                    && !blossomNodes.has(match.firstVertex)) {
+                    contractedMatching.add(contracted.getEdge(match.firstVertex, contractedVertex));
+                } else {
+                    if (!blossomNodes.has(match.secondVertex)
+                        && !blossomNodes.has(match.firstVertex)) {
+                        contractedMatching.add(contracted.getEdge(match.firstVertex, match.secondVertex));
+                    }
+                }
+            }
+        }
+        return contractedMatching;
+    },
+    getExposedVertexes: function (graph, blossomVertexes, matching, childMap) {
+        let exposedNodes;
+        exposedNodes = graph.getAllVertexes();
+        for (let edge of matching) {
+            if (!edge.firstVertex.visible) {
+                exposedNodes.delete(edge.firstVertex);
+            }
+            if (edge.firstVertex !== null) {
+                if (childMap.size === 0) {
+                    exposedNodes.delete(edge.firstVertex);
+                } else {
+                    if (childMap.has(edge.firstVertex) && childMap.get(edge.firstVertex).length !== 0) {
+                        exposedNodes.delete(edge.firstVertex);
+                    } else {
+                        if (!childMap.has(edge.firstVertex)) {
+                            exposedNodes.delete(edge.firstVertex);
+                        }
+                    }
+                }
+            }
+            if (!edge.secondVertex.visible) {
+                exposedNodes.delete(edge.secondVertex);
+            }
+            if (edge.secondVertex !== null) {
+                if (childMap.size === 0) {
+                    exposedNodes.delete(edge.secondVertex);
+                } else {
+                    if (childMap.has(edge.secondVertex) && childMap.get(edge.secondVertex).length !== 0) {
+                        exposedNodes.delete(edge.secondVertex);
+                    } else {
+                        if (!childMap.has(edge.secondVertex)) {
+                            exposedNodes.delete(edge.secondVertex);
+                        }
+                    }
+                }
+            }
+        }
+        for (let i = 1; i < blossomVertexes.length; ++i) {
+            if (exposedNodes.has(blossomVertexes[i])) {
+                exposedNodes.delete(blossomVertexes[i]);
+            }
+        }
+        for (let node of exposedNodes) {
+            if (!graph.adjacencyList.has(node)) {
+                exposedNodes.delete(node);
+            }
+        }
+        return exposedNodes;
     }
 }

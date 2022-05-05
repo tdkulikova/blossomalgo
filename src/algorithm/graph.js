@@ -65,15 +65,15 @@ module.exports = class Graph {
     }
 
     addEdgeByTwoVertexes(first_vertex, second_vertex) {
-        let f = this.addOrRetrieveVertex(first_vertex);
-        let t = this.addOrRetrieveVertex(second_vertex);
+        let f = this.addVertex(first_vertex);
+        let t = this.addVertex(second_vertex);
         let edge = new Edge(f, t);
         this.adjacencyList.get(f).set(t, edge);
         this.adjacencyList.get(t).set(f, edge);
         this.edgeSet.add(edge);
     }
 
-    addOrRetrieveVertex(value) {
+    addVertex(value) {
         let node = this.nodeMap.get(value);
         if (node == null) {
             node = new Vertex(value);
@@ -87,7 +87,8 @@ module.exports = class Graph {
         let wasAdded = false;
         for (let edgeSet of this.edgeSet) {
             if (edgeSet.firstVertex.value === edge.firstVertex.value &&
-                edgeSet.secondVertex.value === edge.secondVertex.value || edgeSet.firstVertex.value === edge.secondVertex.value &&
+                edgeSet.secondVertex.value === edge.secondVertex.value ||
+                edgeSet.firstVertex.value === edge.secondVertex.value &&
                 edgeSet.secondVertex.value === edge.firstVertex.value) {
                 wasAdded = true;
             }
@@ -110,8 +111,7 @@ module.exports = class Graph {
     }
 
     getVertex(value) {
-        let v = this.nodeMap.get(value);
-        return v;
+        return this.nodeMap.get(value);
     }
 
     getAllEdges() {
@@ -132,16 +132,16 @@ module.exports = class Graph {
         return list;
     }
 
-    getAdjacentVertexes(node) {
-        return new Set(this.adjacencyList.get(node).keys());
+    getAdjacentVertexes(vertex) {
+        return new Set(this.adjacencyList.get(vertex).keys());
     }
 
     getContractedVertex() {
         return this.contractedVertex;
     }
 
-    getEdge(node1, node2) {
-        return this.adjacencyList.get(node1).get(node2);
+    getEdge(first_vertex, second_vertex) {
+        return this.adjacencyList.get(first_vertex).get(second_vertex);
     }
 
     removeEdge(first_vertex, second_vertex) {

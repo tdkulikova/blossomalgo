@@ -1,5 +1,6 @@
 const cytoscape = require("cytoscape");
-
+require("../algorithm/auxiliaryFunctions");
+require("./makeVisual");
 let forest;
 
 module.exports = {
@@ -55,8 +56,7 @@ module.exports = {
             elements: {
                 //selectable: false,
                 grabbable: false,
-                nodes: [
-                ], // nodes
+                nodes: [], // nodes
                 edges: []
 
             }
@@ -64,7 +64,13 @@ module.exports = {
         forest.center();
     },
 
-    getForest:function() {
+    getForest: function () {
         return forest;
+    },
+
+    cleanForest: function () {
+        for (let node of forest.nodes()) {
+            forest.remove(node);
+        }
     }
 }

@@ -1,8 +1,7 @@
 const cytoscape = require("cytoscape");
 
 const {getGraphFromCanvas} = require("../../algorithm/algorithm");
-const Json = require("cytoscape/src/style/json");
-
+require("cytoscape/src/style/json");
 let cont = cytoscape();
 module.exports = cont;
 
@@ -90,7 +89,6 @@ function graphGenerator() {
             ],
 
             elements: {
-                //selectable: false,
                 grabbable: false,
                 nodes: [{
                     data: {
@@ -102,17 +100,17 @@ function graphGenerator() {
                         id: '2',
                         text: '2'
                     }
-                }], // nodes
+                }],
                 edges: [{
                     data: {
                         color: '#f00',
                         source: '1',
                         target: '2'
                     }
-                }] // edges
-            } // elements
+                }]
+            }
         }
-    ); // cytoscape*/);
+    );
 
     let graphSvg = document.querySelector('#graphSvg');
     graph.startBatch();
@@ -209,12 +207,11 @@ function initial() {
         ],
 
         elements: {
-            //selectable: false,
             grabbable: false,
-            nodes: [], // nodes
-            edges: [] // edges
-        } // elements
-    }); // cytoscape*/
+            nodes: [],
+            edges: []
+        }
+    });
 
     for (let node of graph.nodes()) {
         node.selectify();
@@ -243,11 +240,11 @@ function initial() {
         });
     })
 
-    cy.on('click', 'node', function (evt) {
+    cy.on('click', 'node', function () {
         clickedNode = this.id();
     });
 
-    cy.on('select', 'edge', function (evt) {
+    cy.on('select', 'edge', function () {
         clickedNode = this.id();
     });
 

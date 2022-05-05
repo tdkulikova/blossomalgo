@@ -36,7 +36,8 @@ module.exports = {
             isInMatching = false;
             for (let edge of matching) {
                 if (parseInt(ele.source().id()) === edge.firstVertex.value &&
-                    parseInt(ele.target().id()) === edge.secondVertex.value || parseInt(ele.source().id()) === edge.secondVertex.value &&
+                    parseInt(ele.target().id()) === edge.secondVertex.value ||
+                    parseInt(ele.source().id()) === edge.secondVertex.value &&
                     parseInt(ele.target().id()) === edge.firstVertex.value) {
                     isInMatching = true;
                 }
@@ -281,5 +282,13 @@ module.exports = {
         forest.endBatch();
         forest.center();
         forest.fit()
+    },
+
+    hideBlossomVertexes: function (blossomVertexes, cy, contractedVertex) {
+        for (let node of blossomVertexes) {
+            if (node.value !== contractedVertex.value) {
+                cy.getElementById(node.value).hide();
+            }
+        }
     }
 }

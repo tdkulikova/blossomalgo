@@ -10,8 +10,8 @@ module.exports = class Edge {
         this.marked = false;
     }
 
-    getOtherEnd(oneEnd) {
-        if (this.firstVertex.value === oneEnd.value) {
+    getAnotherEnd(vertex) {
+        if (this.firstVertex.value === vertex.value) {
             return this.secondVertex;
         } else {
             return this.firstVertex;

@@ -21,7 +21,6 @@
             <script type="text/javascript">
                 document.getElementById('algoSvg').innerHTML = 'Draw graph and start Blossom Algorithm';
             </script>
-
         </div>
         <div class="forest" id = "forest">
             <h1 class="forestTitle">Forest</h1>
@@ -37,24 +36,23 @@
         <div id="graphics">
         </div>
     </div>
-    <div class="upper">
-        <button id="button-delete" class="button-styled">Delete</button>
-        <button id = "button-clear" class="button-styled"> Clear</button>
-        <button id="button-ok" class="button-styled" onclick="show('none')">OK</button>
-        <button id="button-cancel" class="button-styled"
+    <div class="bottom">
+        <button id="button-delete" class="button">Delete</button>
+        <button id = "button-clear" class="button"> Clear</button>
+        <button id="button-ok" class="button" onclick="show('none')">OK</button>
+        <button id="button-cancel" class="button"
                 onclick="show('none')">
             Cancel
         </button>
     </div>
 </div>
 <div class="upper">
-    <button id="button-create" class="button-styled" onclick="show('block')">Create Graph</button>
-    <button id = "button-generate" class="button-styled"> Generate Graph</button>
-    <button id="button-start" class="button-styled">Start Blossom Algorithm</button>
+    <button id="button-create" class="button" onclick="show('block')">Create Graph</button>
+    <button id = "button-generate" class="button"> Generate Graph</button>
+    <button id="button-start" class="button">Start Blossom Algorithm</button>
 </div>
 
 <script type="text/javascript">
-    //Функция показа
     function show(state) {
         document.getElementById('window').style.display = state;
         document.getElementById('wrap').style.display = state;
