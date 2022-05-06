@@ -4,6 +4,7 @@ module.exports = {
         document.getElementById('button-generate').disabled = false;
         document.getElementById('algoSvg').innerText += "Matching is found!\n";
         document.getElementById('algoSvg').innerText += "Matching Size: " + matching.size + "\n";
+
     },
     correctingNodesAndEdges: function (cy) {
         for (let node of cy.nodes()) {

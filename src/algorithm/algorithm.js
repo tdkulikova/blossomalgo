@@ -61,6 +61,8 @@ function processingExposedVertexes(blossomVertexes, cy) {
 }
 
 function findAugPathWithBlossom(contractedGraph, contractedMatching, blossomVertexes, cy) {
+    auxiliaryFunc.correctingNodesAndEdges(cy);
+    visual.unColorAdjacentEdges(cy, matching);
     visual.finalColoring(cy, matching);
     vertexesToCheck = auxiliaryFunc.getExposedVertexes(graph, blossomVertexes, matching, forestChild);
     visual.colorExposedVertexes(vertexesToCheck, cy);
@@ -183,7 +185,9 @@ function endOrGoNext(graphToCheck, cy) {
             fullLifting(cy);
         }
         matching = auxiliaryFunc.addAltEdges(augPath, graph, matching);
-        auxiliaryFunc.finalOutput(matching);
+        if (vertexesToCheck.size > 0) {
+            auxiliaryFunc.finalOutput(matching);
+        }
     }
 }
 
