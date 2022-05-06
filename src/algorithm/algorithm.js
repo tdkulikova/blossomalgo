@@ -185,7 +185,7 @@ function endOrGoNext(graphToCheck, cy) {
             fullLifting(cy);
         }
         matching = auxiliaryFunc.addAltEdges(augPath, graph, matching);
-        if (vertexesToCheck.size > 0) {
+        if (vertexesToCheck.size - 1 > 0) {
             auxiliaryFunc.finalOutput(matching);
         }
     }
@@ -345,15 +345,15 @@ function contractBlossom(graph, blossom, cy) {
         contracted.addEdge(edge);
     }
     let removed;
+    for (let node of blossom) {
+        if (node.value !== contractedVertex.value) {
+        node.visible = false;}
+    }
     for (let i = 0; i < blossom.length - 1; i++) {
         removed = contracted.removeEdge(blossom[i], blossom[i + 1]);
         visual.drawRemovingEdge(blossom[i], blossom[i + 1], cy);
-        blossom[i].visible = false;
-        blossom[i + 1].visible = false;
     }
     contracted.removeEdge(blossom[blossom.length - 1], blossom[0]);
-    blossom[blossom.length - 1].visible = false;
-    blossom[0].visible = false;
     visual.drawRemovingEdge(blossom[blossom.length - 1], blossom[0], cy);
     for (let i = 1; i < blossom.length; ++i) {
         let allNodes = graph.getAdjacentVertexes(blossom[i]);

@@ -105,8 +105,6 @@ module.exports = class Graph {
             this.adjacencyList.get(edge.firstVertex).set(edge.secondVertex, edge);
             this.adjacencyList.get(edge.secondVertex).set(edge.firstVertex, edge);
             this.edgeSet.add(edge);
-            edge.firstVertex.visible = true;
-            edge.secondVertex.visible = true;
         }
     }
 
@@ -149,8 +147,6 @@ module.exports = class Graph {
         this.edgeSet.delete(edge);
         this.adjacencyList.get(first_vertex).delete(second_vertex);
         this.adjacencyList.get(second_vertex).delete(first_vertex);
-        first_vertex.visible = false;
-        second_vertex.visible = false;
         return edge;
     }
 
