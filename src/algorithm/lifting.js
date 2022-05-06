@@ -81,6 +81,9 @@ function liftPathWithBlossom(cy, augPath, blossom, notContractedGraph, contracte
     for (let edge of notContractedGraph.edgeSet) {
         visual.drawShowingEdge(edge.firstVertex, edge.secondVertex, cy);
     }
+    for (let node of blossom) {
+        node.visible = true;
+    }
     for (let edge of contractedGraph.edgeSet) {
         let hasNotContractedGraph = false;
         for (let edgeNot of notContractedGraph.edgeSet) {

@@ -282,14 +282,18 @@ function blossomConstruction(cy, matching,
     document.getElementById('algoSvg').innerText += "Blossom is: \n";
     let curr = v;
     while (curr !== root) {
-        blossomVertexes.push(curr);
+        if (curr.visible) {
+            blossomVertexes.push(curr);
+        }
         curr = forestParents.get(curr);
     }
     blossomVertexes.push(root);
     blossomVertexes.reverse();
     curr = w;
     while (curr !== root) {
-        blossomVertexes.push(curr);
+        if (curr.visible) {
+            blossomVertexes.push(curr);
+        }
         curr = forestParents.get(curr);
     }
     blossomVertexes.push(root);
@@ -344,8 +348,12 @@ function contractBlossom(graph, blossom, cy) {
     for (let i = 0; i < blossom.length - 1; i++) {
         removed = contracted.removeEdge(blossom[i], blossom[i + 1]);
         visual.drawRemovingEdge(blossom[i], blossom[i + 1], cy);
+        blossom[i].visible = false;
+        blossom[i + 1].visible = false;
     }
     contracted.removeEdge(blossom[blossom.length - 1], blossom[0]);
+    blossom[blossom.length - 1].visible = false;
+    blossom[0].visible = false;
     visual.drawRemovingEdge(blossom[blossom.length - 1], blossom[0], cy);
     for (let i = 1; i < blossom.length; ++i) {
         let allNodes = graph.getAdjacentVertexes(blossom[i]);
