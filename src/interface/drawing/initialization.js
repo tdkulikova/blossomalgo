@@ -131,13 +131,11 @@ function graphGenerator() {
                 }
             });
     }
-    let probability = 0.7;
-    console.log("Probability: " + probability + "\n");
+    let probability = 0.5;
     for (let i = 1; i < nodesAmount; ++i) {
         for (let j = i; j <= nodesAmount; ++j) {
             if (i !== j) {
                 let randomNumber = Math.random();
-                console.log("Random number:" + randomNumber);
                 if (randomNumber > probability) {
                     graph.add({
                         group: 'edges',
@@ -258,7 +256,6 @@ function initial() {
             }
         }
         if (selectedNodes === 2) {
-            console.log("Adding edge " + lastEdgeId);
             cy.add({
                 group: 'edges',
                 data: {source: ids[0], target: ids[1]}
