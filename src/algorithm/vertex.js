@@ -7,13 +7,6 @@ module.exports = class Vertex {
         this.visible = true;
     }
 
-    equals(obj) {
-        if (obj instanceof Node) {
-            return this.value.equals(obj.value);
-        }
-        return false;
-    }
-
     toString() {
         return "<" + this.value + ">";
     }

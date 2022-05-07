@@ -47,7 +47,7 @@ module.exports = {
         }
         return amount >= 2;
     },
-    findAnotherNodeInMatching: function (edges, vertex) {
+    findAnotherVertexInMatching: function (edges, vertex) {
         for (let edge of edges) {
             if (edge.firstVertex === vertex) {
                 return edge.secondVertex;
@@ -58,7 +58,7 @@ module.exports = {
         }
         return null;
     },
-    containsEdgeWithNode: function (path, vertex) {
+    containsEdgeWithVertex: function (path, vertex) {
         for (let i = 0; i < path.length; ++i) {
             if (path[i] === vertex)
                 return true;
@@ -84,7 +84,8 @@ module.exports = {
         document.getElementById('algoSvg').innerText += "Blossom lifting error!\n\n";
         return -1;
     },
-    addAltEdges: function (augPath, graph, matching) {
+
+    inverseAugPath: function (augPath, graph, matching) {
         for (let i = 0; i < augPath.length - 1; i += 1) {
             if (i % 2 === 0) {
                 matching.add(graph.getEdge(augPath[i], augPath[i + 1]));
@@ -96,30 +97,22 @@ module.exports = {
         return matching;
     },
 
-    returnAugPath: function (graph, rootMap, parentMap, heightMap, v, w) {
+    returnAugPath: function (forestParents, v, w) {
         let augPath = [];
         let curr = v;
         while (curr != null) {
             augPath.push(curr);
-            curr = parentMap.get(curr);
+            curr = forestParents.get(curr);
         }
         augPath.reverse();
         curr = w;
         while (curr != null) {
             augPath.push(curr);
-            curr = parentMap.get(curr);
+            curr = forestParents.get(curr);
         }
         return augPath;
     },
-    unselectingVertexesAndEdges: function (cy) {
-        for (let node of cy.nodes()) {
-            node.unselectify();
-        }
-        for (let edge of cy.edges()) {
-            edge.unselect();
-            edge.unselectify();
-        }
-    },
+
     contractMatching: function (contracted, matching, blossom, contractedVertex) {
         let contractedMatching = new Set();
         let blossomNodes = new Set();
@@ -144,7 +137,7 @@ module.exports = {
         }
         return contractedMatching;
     },
-    getExposedVertexes: function (graph, blossomVertexes, matching, childMap) {
+    getExposedVertexes: function (graph, blossomVertexes, matching, forestChild) {
         let exposedNodes;
         exposedNodes = graph.getAllVertexes();
         for (let edge of matching) {
@@ -152,13 +145,13 @@ module.exports = {
                 exposedNodes.delete(edge.firstVertex);
             }
             if (edge.firstVertex !== null) {
-                if (childMap.size === 0) {
+                if (forestChild.size === 0) {
                     exposedNodes.delete(edge.firstVertex);
                 } else {
-                    if (childMap.has(edge.firstVertex) && childMap.get(edge.firstVertex).length !== 0) {
+                    if (forestChild.has(edge.firstVertex) && forestChild.get(edge.firstVertex).length !== 0) {
                         exposedNodes.delete(edge.firstVertex);
                     } else {
-                        if (!childMap.has(edge.firstVertex)) {
+                        if (!forestChild.has(edge.firstVertex)) {
                             exposedNodes.delete(edge.firstVertex);
                         }
                     }
@@ -168,13 +161,13 @@ module.exports = {
                 exposedNodes.delete(edge.secondVertex);
             }
             if (edge.secondVertex !== null) {
-                if (childMap.size === 0) {
+                if (forestChild.size === 0) {
                     exposedNodes.delete(edge.secondVertex);
                 } else {
-                    if (childMap.has(edge.secondVertex) && childMap.get(edge.secondVertex).length !== 0) {
+                    if (forestChild.has(edge.secondVertex) && forestChild.get(edge.secondVertex).length !== 0) {
                         exposedNodes.delete(edge.secondVertex);
                     } else {
-                        if (!childMap.has(edge.secondVertex)) {
+                        if (!forestChild.has(edge.secondVertex)) {
                             exposedNodes.delete(edge.secondVertex);
                         }
                     }

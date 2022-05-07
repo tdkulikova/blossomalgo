@@ -27,10 +27,6 @@ let contrMatching = matching;
 
 let v;
 
-function blossomAlgorithm(graph, cy) {
-    findAugmentingPath(graph, matching, [], cy);
-}
-
 function findAugmentingPath(graph, matching, blossomVertexes, cy) {
     augPath = [];
     if (blossomVertexes.length === 0) {
@@ -117,7 +113,7 @@ function checkingSelectedEdge(w, cy) {
 }
 
 function secondVertexInMatching(w, cy) {
-    let x = auxiliaryFunc.findAnotherNodeInMatching(matching, w);
+    let x = auxiliaryFunc.findAnotherVertexInMatching(matching, w);
     addToForest(v, w, x);
     if (graph.getAdjacentEdges(x, matching).size > 0) {
         vertexesToCheck.add(x);
@@ -148,14 +144,14 @@ function foundAugmentingPath(cy, w) {
     auxiliaryFunc.correctingNodesAndEdges(cy);
     visual.unColorAdjacentEdges(cy, matching);
     let wasBlossomed;
-    augPath = auxiliaryFunc.returnAugPath(graph, forestRoots, forestParents, forestHeights, v, w);
+    augPath = auxiliaryFunc.returnAugPath(forestParents, v, w);
     document.getElementById('algoSvg').innerText += "The augmenting path: " + augPath + "\n\n";
     for (let i = blossoms.length - 1; i >= 0; --i) {
         wasBlossomed = true;
         lifting(i, cy);
     }
     initializeOrDrawAugPath(wasBlossomed, cy);
-    matching = auxiliaryFunc.addAltEdges(augPath, graph, matching);
+    matching = auxiliaryFunc.inverseAugPath(augPath, graph, matching);
     let graphToCheck = graph;
     visual.finalColoring(cy, matching);
     if (graphConditions.length > 0) {
@@ -184,7 +180,7 @@ function endOrGoNext(graphToCheck, cy) {
         if (blossoms.length > 0) {
             fullLifting(cy);
         }
-        matching = auxiliaryFunc.addAltEdges(augPath, graph, matching);
+        matching = auxiliaryFunc.inverseAugPath(augPath, graph, matching);
         if (vertexesToCheck.size - 1 > 0) {
             auxiliaryFunc.finalOutput(matching);
         }
@@ -228,7 +224,7 @@ function endingAlgorithm(cy, selectedEdge) {
             if (blossoms.length > 0) {
                 fullLifting(cy);
             }
-            matching = auxiliaryFunc.addAltEdges(augPath, graph, matching);
+            matching = auxiliaryFunc.inverseAugPath(augPath, graph, matching);
             visual.finalColoring(cy, matching);
             auxiliaryFunc.finalOutput(matching);
         }
@@ -330,7 +326,7 @@ function contraction(blossomVertexes, cy) {
         auxiliaryFunc.contractMatching(contractedGraph, contrMatching, blossomVertexes, contractedVertex);
     contrMatching = contractedMatching;
     findAugPathWithBlossom(graph, contractedMatching, blossomVertexes, cy);
-    if (auxiliaryFunc.containsEdgeWithNode(augPath, contractedVertex)) {
+    if (auxiliaryFunc.containsEdgeWithVertex(augPath, contractedVertex)) {
         augPath = liftPathWithBlossom(cy, augPath, blossomVertexes, graph);
     }
     return augPath;
@@ -404,7 +400,7 @@ function initializeFields() {
 
 function checkAndStart(cy) {
     if (graph.nodeMap.size >= 2 && graph.edgeSet.size >= 1) {
-        blossomAlgorithm(graph, cy);
+        findAugmentingPath(graph, matching, [], cy);
     } else {
         document.getElementById('algoSvg').innerText = "Your graph should have at least two vertexes and one edge"
         document.getElementById('button-create').disabled = false;
@@ -458,7 +454,7 @@ module.exports = {
         initializeFields();
         addEdgesAndVertexesToGraph(cy);
         graph.findComponents();
-        auxiliaryFunc.unselectingVertexesAndEdges(cy);
+        auxiliaryFunc.correctingNodesAndEdges(cy);
         selectingVertexEvent(cy);
         selectingEdgeEvent(cy);
         checkAndStart(cy);

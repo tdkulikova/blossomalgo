@@ -1,13 +1,11 @@
 
 module.exports = class Edge {
-    marked;
     firstVertex;
     secondVertex;
 
     constructor(firstVertex, secondVertex) {
         this.firstVertex = firstVertex;
         this.secondVertex = secondVertex;
-        this.marked = false;
     }
 
     getAnotherEnd(vertex) {
@@ -18,14 +16,6 @@ module.exports = class Edge {
         }
     }
 
-    equals(obj) {
-        if (obj instanceof Edge) {
-            let objEdge = obj;
-            return this.firstVertex.equals(objEdge.firstVertex) &&
-                this.secondVertex.equals(objEdge.secondVertex);
-        }
-        return false;
-    }
 
     toString() {
         return "(" + this.firstVertex + ", " + this.secondVertex + ")";

@@ -11,8 +11,6 @@ module.exports = {
                             'line-color': 'blue'
                         })
                         ele.selectify();
-                    } else {
-
                     }
                 }
             }
@@ -129,8 +127,8 @@ module.exports = {
         }
     },
 
-    colorExposedVertexes: function (nodesToCheck, cy) {
-        for (let node of nodesToCheck) {
+    colorExposedVertexes: function (vertexesToCheck, cy) {
+        for (let node of vertexesToCheck) {
             cy.getElementById(node.value).style({
                 'width': 40,
                 'height': 40,
@@ -196,11 +194,11 @@ module.exports = {
         }
     },
 
-    drawAddingEdgeToForest: function (forest, firstVertex, secondVertex, rootMap, childMap, parentMap) {
+    drawAddingEdgeToForest: function (forest, firstVertex, secondVertex, forestRoots, forestChild, forestParents) {
         let isFirstExists = false;
         let isSecondExists = false;
         let first;
-        let root = rootMap.get(firstVertex);
+        let root = forestRoots.get(firstVertex);
         for (let node of forest.nodes()) {
             if (parseInt(node.id(), 10) === firstVertex.value) {
                 isFirstExists = true;
@@ -216,28 +214,28 @@ module.exports = {
             let x;
             let y;
             if (firstVertex !== root) {
-                if (childMap.get(firstVertex).length === 1) {
+                if (forestChild.get(firstVertex).length === 1) {
                     x = first.position().x;
                     y = first.position().y + 50;
                 } else {
-                    if ((childMap.get(firstVertex).length - 1) % 2 === 1) {
-                        x = first.position().x - (childMap.get(firstVertex).length - 1) / 20 * 400;
+                    if ((forestChild.get(firstVertex).length - 1) % 2 === 1) {
+                        x = first.position().x - (forestChild.get(firstVertex).length - 1) / 20 * 400;
                         y = first.position().y + 50;
                     } else {
-                        x = first.position().x + (childMap.get(firstVertex).length - 2) / 20 * 400;
+                        x = first.position().x + (forestChild.get(firstVertex).length - 2) / 20 * 400;
                         y = first.position().y + 50;
                     }
                 }
             } else {
-                if (childMap.get(root).length === 1) {
+                if (forestChild.get(root).length === 1) {
                     x = first.position().x;
                     y = first.position().y + 50;
                 } else {
-                    if ((childMap.get(root).length - 1) % 2 === 1) {
-                        x = first.position().x - (childMap.get(root).length - 1) / 20 * 400;
+                    if ((forestChild.get(root).length - 1) % 2 === 1) {
+                        x = first.position().x - (forestChild.get(root).length - 1) / 20 * 400;
                         y = first.position().y + 50;
                     } else {
-                        x = first.position().x + (childMap.get(root).length - 2) / 20 * 400;
+                        x = first.position().x + (forestChild.get(root).length - 2) / 20 * 400;
                         y = first.position().y + 50;
                     }
                 }
