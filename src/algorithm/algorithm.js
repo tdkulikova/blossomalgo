@@ -126,7 +126,7 @@ function secondVertexInMatching(w, cy) {
         "The vertex " + w + "is in the matching, so we have found the adjacent vertex " + x +
         "which is also in the matching\n\n";
     document.getElementById('algoSvg').innerText +=
-        "Vertexes " + v + " , " + w + " , " + x + " added to forest\n\n";
+        "Vertexes " + v + " , " + w + " , " + x + " were added to forest\n\n";
     if (adjacentEdges.size === 0) {
         for (let node of vertexesToCheck) {
             if (node.value !== v.value) {
