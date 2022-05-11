@@ -402,7 +402,8 @@ function checkAndStart(cy) {
     if (graph.nodeMap.size >= 2 && graph.edgeSet.size >= 1) {
         findAugmentingPath(graph, matching, [], cy);
     } else {
-        document.getElementById('algoSvg').innerText = "Your graph should have at least two vertexes and one edge"
+        document.getElementById('algoSvg').innerText =
+            "Your graph should have at least two vertexes and one edge"
         document.getElementById('button-create').disabled = false;
         document.getElementById('button-generate').disabled = false;
     }
