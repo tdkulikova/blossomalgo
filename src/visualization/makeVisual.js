@@ -253,7 +253,7 @@ module.exports = {
             })
             forest.add({
                 group: 'edges',
-                data: {source: firstVertex.value, target: secondVertex.value}
+                data: {source: firstVertex.value, target: secondVertex.value},
             })
         }
         forest.fit();

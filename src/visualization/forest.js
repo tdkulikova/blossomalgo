@@ -12,6 +12,7 @@ module.exports = {
             layout: {
                 name: 'breadthfirst',
             },
+            directed: true,
             style: [{
                 selector: 'node',
                 style: {
@@ -30,9 +31,10 @@ module.exports = {
                     selector: 'edge',
                     style: {
                         'width': 2,
+                        'curve-style': 'bezier',
                         'target-arrow-shape': 'triangle',
                         'line-color': 'brown',
-                        'target-arrow-color': '#9dbaea'
+                        'target-arrow-color': 'brown',
                     }
                 },
 
@@ -54,7 +56,7 @@ module.exports = {
                 }
             ],
             elements: {
-                //selectable: false,
+                directed: true,
                 grabbable: false,
                 nodes: [], // nodes
                 edges: []
